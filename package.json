@@ -1,0 +1,18 @@
+{
+  "name": "nuxeo-gmail",
+  "version": "1.0.0",
+  "description": "Nuxeo Gmail Addon",
+  "scripts": {
+    "build": "gulp",
+    "lint": "jshint src/*.gs",
+    "format": "prettier --write src/*.gs"
+  },
+  "author": "Nuxeo",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "gulp": "^3.9.1",
+    "gulp-concat": "^2.6.1",
+    "jshint": "^2.9.5",
+    "prettier": "1.7.3"
+  }
+}

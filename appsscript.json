@@ -1,0 +1,38 @@
+{
+  "timeZone": "America/New_York",
+  "dependencies": {
+    "libraries": [{
+      "userSymbol": "OAuth2",
+      "libraryId": "1B7FSrk5Zi6L1rSxxTDgDEUsPzlukDsi4KGuTMorsTQHhGBzBkMun4iDF",
+      "version": "21"
+    }]
+  },
+  "exceptionLogging": "CLOUD",
+  "oauthScopes": [
+    "https://www.googleapis.com/auth/script.storage",
+    "https://www.googleapis.com/auth/gmail.addons.execute",
+    "https://www.googleapis.com/auth/gmail.addons.current.message.readonly",
+    "https://www.googleapis.com/auth/script.external_request"
+  ],
+  "gmail": {
+    "name": "GitHub Reader",
+    "logoUrl": "https://jira.nuxeo.com/secure/attachment/65119/NUXEO-X-2.jpg",
+    "contextualTriggers": [{
+      "unconditional": {
+      },
+      "onTriggerFunction": "getContextualAddOn"
+    }],
+    "universalActions": [{
+      "text": "Settings",
+      "runFunction": "handleShowSettings"
+    }],
+    "openLinkUrlPrefixes": [
+        "https://github.com"
+    ],
+    "primaryColor": "#111111"
+  },
+  "urlFetchWhitelist": [
+    "https://api.github.com/",
+    "https://github.com/"
+  ]
+}
