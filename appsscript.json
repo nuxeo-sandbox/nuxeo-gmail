@@ -15,7 +15,7 @@
     "https://www.googleapis.com/auth/script.external_request"
   ],
   "gmail": {
-    "name": "GitHub Reader",
+    "name": "Nuxeo",
     "logoUrl": "https://jira.nuxeo.com/secure/attachment/65119/NUXEO-X-2.jpg",
     "contextualTriggers": [{
       "unconditional": {
