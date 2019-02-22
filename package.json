@@ -10,9 +10,9 @@
   "author": "Nuxeo",
   "license": "Apache-2.0",
   "devDependencies": {
-    "gulp": "^4.0.0",
+    "gulp": "^3.9.1",
     "gulp-concat": "^2.6.1",
-    "jshint": "^2.10.1",
+    "jshint": "^2.9.5",
     "prettier": "1.7.3"
   }
 }
