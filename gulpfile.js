@@ -2,8 +2,8 @@ const gulp = require('gulp');
 const concat = require('gulp-concat');
 
 const third_party_source = [
-	'../third_party/moment/moment.js',
-	'../third_party/lodash/lodash.js'
+	'third_party/moment/moment.js',
+	'third_party/lodash/lodash.js'
 ];
 
 gulp.task('concat-third-party', function() {
