@@ -27,12 +27,11 @@
       "runFunction": "handleShowSettings"
     }],
     "openLinkUrlPrefixes": [
-        "https://github.com"
+        "https://nightly.nuxeo.com"
     ],
     "primaryColor": "#111111"
   },
   "urlFetchWhitelist": [
-    "https://api.github.com/",
-    "https://github.com/"
+    "https://nightly.nuxeo.com/"
   ]
 }

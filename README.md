@@ -141,13 +141,10 @@ occur during the execution of the add-on.
 
 <!-- References -->
 [quickstart]:https://developers.google.com/gmail/add-ons/guides/quickstart
-[node]:https://nodejs.org/en/
 [clasp]:https://github.com/google/clasp
 [apps-script]: https://script.google.com
-[github]: https://github.com
 [github-repo]: https://github.com/vpasquier/nuxeo-gmail
 [gmail-settings]: https://mail.google.com/mail/#settings/addons
 [gmail]: https://mail.google.com/
 [lodash]: https://lodash.com/
 [moment]: http://momentjs.com/
-[github-oauth]: https://developer.github.com/apps/building-integrations/setting-up-and-registering-oauth-apps/registering-oauth-apps/

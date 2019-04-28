@@ -40,11 +40,11 @@ function getCurrentMessage(event) {
  * @param {string|string[]} messageBodies - message bodies to scan for links.
  * @return {GitHubLink[]} extracted link information, empty array if none found.
  */
-function extractGitHubLinks(messageBodies) {
+function extractNuxeoLinks(messageBodies) {
   var bodies = _.castArray(messageBodies);
   var links = [];
   _.each(bodies, function(body) {
-    extractGitHubLinksFromText_(body, links);
+    extractNuxeoLinksFromText_(body, links);
   });
   return _.uniqBy(links, function(item) {
     return item.owner + item.repo + item.id;
@@ -57,7 +57,7 @@ function extractGitHubLinks(messageBodies) {
  * @param {string|string[]} text - raw text to scan for links.
  * @return {GitHubLink[]} extracted link information, empty array if none found.
  */
-function extractGitHubLinksFromText_(text, appendTo) {
+function extractNuxeoLinksFromText_(text, appendTo) {
   var re = /https:\/\/github.com\/([^\/]+?)\/([^\/]+?)\/(issues|pull)\/(\d+)/gi;
   while ((match = re.exec(text)) !== null) {
     var type = stripHtmlTags(match[3]);

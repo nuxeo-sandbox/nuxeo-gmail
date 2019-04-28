@@ -1,16 +1,11 @@
-// Copyright 2017 Google Inc. All Rights Reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+/*
+ * (C) Copyright 2018-2019 Nuxeo SA (http://nuxeo.com/).
+ * This is unpublished proprietary source code of Nuxeo SA. All rights reserved.
+ * Notice of copyright on this source code does not indicate publication.
+ *
+ * Contributors:
+ *     Nuxeo
+ */
 
 /**
  * Exception to raise when authorization is required.
@@ -20,15 +15,15 @@
 function AuthorizationRequiredException() {}
 
 /**
- * Prototype object for the GitHub API client.
+ * Prototype object for the Nuxeo API client.
  */
-var GitHubClientPrototype = {
-  apiEndpoint: "https://api.github.com/graphql",
+var NuxeoClientPrototype = {
+  apiEndpoint: "https://nightly.nuxeo.com/nuxeo",
   oauthService: null,
   /**
-   * Execute a GraphQL query against the GitHub API.
+   * Execute a NXQL query against the Nuxeo API.
    *
-   * @param {Query} query - GraphQL query to run
+   * @param {Query} query - NXQL query to run
    * @param {Object} vars - Named variables to include in the query
    * @return {Object} API response
    */
@@ -88,7 +83,7 @@ var GitHubClientPrototype = {
   },
 
   /**
-   * De-authorizes the GitHub client.
+   * De-authorizes the Nuxeo client.
    */
   disconnect: function() {
     this.oauthService.reset();
@@ -104,7 +99,7 @@ var GitHubClientPrototype = {
   },
 
   /**
-   * Handles the oauth response from GitHub. Raises an error
+   * Handles the oauth response from Nuxeo. Raises an error
    * if authorization declined or failed.
    *
    * @param {Object} oauthResponse - response parameters
@@ -118,32 +113,33 @@ var GitHubClientPrototype = {
 };
 
 /**
- * Gets a client instance configured with the script"s credentials.
+ * Gets a client instance configured with the script's credentials.
  *
- * Requires the script property `githubCredentials` to be defined. The value
+ * Requires the script property `nuxeoCredentials` to be defined. The value
  * must be a JSON object with the properties `clientId` and `clientSecret`
- * defined. Obtain these values by registering the project in GitHub"s developer
+ * defined. Obtain these values by registering the project in Nuxeo's developer
  * console.
  *
- * @return {GitHubClient} client instance
+ * @return {NuxeoClientWrapper} client instance
  */
-function githubClient() {
-  var credentials = getGithubCredentials();
+function nuxeoClientWrapper() {
+  var credentials = getNuxeoCredentials();
   if (!credentials) {
     throw new Error(
-      "No credentials found. Set the script property `githubCredentials`"
+      "No credentials found. Set the script property `nuxeoCredentials`"
     );
   }
-  var oauthService = OAuth2.createService("github")
-    .setAuthorizationBaseUrl("https://github.com/login/oauth/authorize")
-    .setTokenUrl("https://github.com/login/oauth/access_token")
+  console.log("OAuth execution...");
+  var oauthService = OAuth2.createService("nuxeo")
+    .setAuthorizationBaseUrl("https://nightly.nuxeo.com/nuxeo/oauth2/authorize")
+    .setTokenUrl("https://nightly.nuxeo.com/nuxeo/oauth2/access-token")
     .setClientId(credentials.clientId)
     .setClientSecret(credentials.clientSecret)
-    .setCallbackFunction("handleGitHubOAuthResponse")
+    .setCallbackFunction("handleNuxeoOAuthResponse")
     .setPropertyStore(PropertiesService.getUserProperties())
     .setCache(CacheService.getUserCache())
     .setScope("user user:email user:follow repo");
-  return _.assign(Object.create(GitHubClientPrototype), {
+  return _.assign(Object.create(NuxeoClientPrototype), {
     oauthService: oauthService
   });
 }

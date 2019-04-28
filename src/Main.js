@@ -1,16 +1,11 @@
-// Copyright 2017 Google Inc. All Rights Reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+/*
+ * (C) Copyright 2018-2019 Nuxeo SA (http://nuxeo.com/).
+ * This is unpublished proprietary source code of Nuxeo SA. All rights reserved.
+ * Notice of copyright on this source code does not indicate publication.
+ *
+ * Contributors:
+ *     Nuxeo
+ */
 
 var DEBUG = true;
 
@@ -39,6 +34,7 @@ var DEBUG = true;
  * @return {Card[]}
  */
 function getContextualAddOn(event) {
+  console.log("Nuxeo Gmail Starting...");
   event.parameters = { action: "showAddOn" };
   return dispatchActionInternal_(event, addOnErrorHandler);
 }
@@ -77,15 +73,11 @@ function handleAuthorizationRequired() {
 }
 
 /**
- * Handles the OAuth response from GitHub.
+ * Handles the OAuth response from Nuxeo.
  * 
  * The redirect URL to enter is:
  * https://script.google.com/macros/d/<Apps Script ID>/usercallback
  *
- * See the Apps Script OAuth2 Library documentation for more
- * information:
- *
- * https://github.com/googlesamples/apps-script-oauth2#1-create-the-oauth2-service
  *
  * @param {Object} oauthResponse - The request data received from the
  *     callback function. Pass it to the service"s handleCallback() method
@@ -93,13 +85,13 @@ function handleAuthorizationRequired() {
  * @return {HtmlOutput} a success or denied HTML message to display to
  *     the user. Also sets a timer to close the window automatically.
  */
-function handleGitHubOAuthResponse(oauthResponse) {
+function handleNuxeoOAuthResponse(oauthResponse) {
   if (DEBUG) {
-    console.time("handleGitHubOAuthResponse");
+    console.time("handleNuxeoOAuthResponse");
   }
 
   try {
-    githubClient().handleOAuthResponse(oauthResponse);
+    nuxeoClientWrapper().handleOAuthResponse(oauthResponse);
     return HtmlService.createHtmlOutputFromFile("html/auth-success");
   } catch (e) {
     var template = HtmlService.createTemplateFromFile("html/auth-failure");
@@ -107,7 +99,7 @@ function handleGitHubOAuthResponse(oauthResponse) {
     return template.evaluate();
   } finally {
     if (DEBUG) {
-      console.timeEnd("handleGitHubOAuthResponse");
+      console.timeEnd("handleNuxeoOAuthResponse");
     }
   }
 }
@@ -172,8 +164,8 @@ function dispatchActionInternal_(event, errorHandler) {
 function addOnErrorHandler(err) {
   if (err instanceof AuthorizationRequiredException) {
     CardService.newAuthorizationException()
-      .setAuthorizationUrl(githubClient().authorizationUrl())
-      .setResourceDisplayName("GitHub")
+      .setAuthorizationUrl(nuxeoClientWrapper().authorizationUrl())
+      .setResourceDisplayName("Nuxeo")
       .setCustomUiCallback("handleAuthorizationRequired")
       .throwException();
   } else {

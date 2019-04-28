@@ -35,7 +35,7 @@ var ActionHandlers = {
    */
   showAddOn: function(e) {
     var message = getCurrentMessage(e);
-    var links = extractGitHubLinks(message.getBody());
+    var links = extractNuxeoLinks(message.getBody());
 
     if (_.isEmpty(links)) {
       return [];
@@ -57,7 +57,7 @@ var ActionHandlers = {
    * @return {CardService.FormAction}
    */
   showSettings: function(e) {
-    var githubResponse = githubClient().query(Queries.VIEWER, {});
+    var githubResponse = nuxeoClientWrapper().query(Queries.VIEWER, {});
 
     var card = buildSettingsCard({
       avatarUrl: githubResponse.viewer.avatarUrl,
@@ -75,7 +75,7 @@ var ActionHandlers = {
    * @param {Event} e - Event from Gmail
    */
   disconnectAccount: function(e) {
-    githubClient().disconnect();
+    nuxeoClientWrapper().disconnect();
     throw new AuthorizationRequiredException();
   },
 
@@ -86,7 +86,7 @@ var ActionHandlers = {
    * @return {CardService.FormAction}
    */
   showUser: function(e) {
-    var githubResponse = githubClient().query(Queries.USER, {
+    var githubResponse = nuxeoClientWrapper().query(Queries.USER, {
       login: e.parameters.login
     });
 
@@ -118,7 +118,7 @@ var ActionHandlers = {
    * @return {CardService.ActionResponse}
    */
   showRepository: function(e) {
-    var githubResponse = githubClient().query(Queries.REPOSITORY, {
+    var githubResponse = nuxeoClientWrapper().query(Queries.REPOSITORY, {
       owner: e.parameters.owner,
       repo: e.parameters.repo
     });
@@ -150,7 +150,7 @@ var ActionHandlers = {
    */
   showAuthorizationCard: function(e) {
     return buildAuthorizationCard({
-      url: githubClient().authorizationUrl()
+      url: nuxeoClientWrapper().authorizationUrl()
     });
   }
 };
@@ -165,7 +165,7 @@ var ActionHandlers = {
  * @private
  */
 function handleIssue_(owner, repoName, id) {
-  var githubResponse = githubClient().query(Queries.ISSUE, {
+  var githubResponse = nuxeoClientWrapper().query(Queries.ISSUE, {
     owner: owner,
     repo: repoName,
     issue: id
@@ -202,7 +202,7 @@ function handleIssue_(owner, repoName, id) {
  * @private
  */
 function handlePullRequest_(owner, repoName, id) {
-  var githubResponse = githubClient().query(Queries.PULL_REQUEST, {
+  var githubResponse = nuxeoClientWrapper().query(Queries.PULL_REQUEST, {
     owner: owner,
     repo: repoName,
     pullRequest: id
