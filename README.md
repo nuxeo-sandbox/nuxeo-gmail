@@ -1,11 +1,12 @@
 # Nuxeo Gmail Addon
 
 This Nuxeo Gmail Addon lets the Gmail user:
-- Browse its files on a given Nuxeo repository
-- Drag and drop those files as attachment for its emails
-- Push attachments from emails to Nuxeo
 
-## Before you begin
+- Push attachments from emails to Nuxeo
+- Display information from Nuxeo links in email
+- Browse and attach any document to emails
+
+## How to take over
 
 If you're new to add-on development or Apps Script, try the
 [quickstart][quickstart] before proceeding.
@@ -15,10 +16,9 @@ This addon requires the following:
 -  [Node.js][node] is installed.
 -  [`clasp`][clasp] is installed. `clasp` is a tool for managing Apps Script
    projects.
--  A [GitHub][github] account, as well as notification emails for an issue or
-  pull request from from a hosted repository.
+-  A Nuxeo server instance
 
-## Downloading the addon
+### Downloading the addon
 
 Download the addon app and navigate into the app directory:
 
@@ -35,7 +35,7 @@ Download the addon app and navigate into the app directory:
 
         npm run build
 
-## Deploy the add-on
+### Deploy the add-on
 
 Deploy the add-on by following these steps:
 
@@ -63,7 +63,7 @@ Note the deployment ids. There will be two deployments, one for the tagged
 version, another for the `@HEAD` version. Use the `@HEAD` deployment when
 installing the add on if you intend to modify or experiment with the code.
 
-## Configure GitHub credentials
+### Configure Nuxeo credentials
 
 Access the GitHub API requires registration. To register your own application:
 
@@ -73,7 +73,7 @@ Access the GitHub API requires registration. To register your own application:
 
 2.  Get the script id by clicking on **File > Project properties** and note the value of the **Script ID** field.
 
-3.  Follow [GitHub's guide][github-oauth] to create an OAuth Application. Use the value `https://script.google.com/macros/d/{SCRIPT_ID}/usercallback` for the **Authorization callback URL**,
+3.   Use the value `https://script.google.com/macros/d/{SCRIPT_ID}/usercallback` for the **Authorization callback URL**,
     replacing `{SCRIPT_ID}` with the script id located in the previous step.
 
 4.  Create a script property with the credentials:
@@ -93,7 +93,7 @@ Access the GitHub API requires registration. To register your own application:
 
 	f. Click **Save**.
 
-## Install the add-on
+### Install the add-on
 
 One the add-on is deployed, install the add-on on your account using these steps:
 
@@ -125,17 +125,6 @@ occur during the execution of the add-on.
     to open a dialog where you can authorize the add-on.
 
 4.  Select the account that should authorize the add-on.
-
-5.  The next dialog may inform you that the app is not verified. In this case you
-    can proceed by doing the following:
-
-    a.  Click **Advanced**.
-
-    b. At the bottom of the dialog, click **Go to Git Info (unsafe)**.
-
-    c. In the new dialog, type "Continue" into the text field, then click **Next**.
-
-6.  Read the notice in the next dialog carefully, then click **Allow**.
 
 7.  Once authorized, the add-on should automatically refresh and start operating.
 

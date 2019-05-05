@@ -7,24 +7,7 @@
  *     Nuxeo
  */
 
-var DEBUG = true;
-
-/**
- * Typedef for events passed from Gmail to the add-on. Supplied for
- * reference.
- *
- * @typedef {Object} Event
- * @property {Object} parameters - Request parameters. Must include a 
- *    key "action" with the name of the action to dispatch
- * @property {Object} formInput - Values of input fields
- */
-
-/**
- * Error handler
- * @callback ErrorHandler
- * @param {Error} exception - Exception to handle
- * @return {Card|ActionResponse|UnivseralActionResponse} optional card or action response to render
- */
+var DEBUG = false;
 
 /** 
  * Entry point for the add-on. Handles an user event and
@@ -34,8 +17,7 @@ var DEBUG = true;
  * @return {Card[]}
  */
 function getContextualAddOn(event) {
-  console.log("Nuxeo Gmail Starting...");
-  event.parameters = { action: "showAddOn" };
+  event.parameters = { action: SHOW_ADDON };
   return dispatchActionInternal_(event, addOnErrorHandler);
 }
 
@@ -50,11 +32,17 @@ function handleShowSettings() {
   return dispatchActionInternal_(
     {
       parameters: {
-        action: "showSettings"
+        action: SHOW_SETTINGS
       }
     },
     universalActionErrorHandler
   );
+}
+
+function disconnect() {
+  nuxeoClientWrapper().disconnect();
+  cachedPropertiesForScript_().clear(NUXEO_URL);
+  cachedPropertiesForScript_().clear(CREDENTIALS_KEY);
 }
 
 /**
@@ -67,7 +55,7 @@ function handleShowSettings() {
 function handleAuthorizationRequired() {
   return dispatchActionInternal_({
     parameters: {
-      action: "showAuthorizationCard"
+      action: SHOW_AUTHORIZATION_CARD
     }
   });
 }
@@ -76,7 +64,7 @@ function handleAuthorizationRequired() {
  * Handles the OAuth response from Nuxeo.
  * 
  * The redirect URL to enter is:
- * https://script.google.com/macros/d/<Apps Script ID>/usercallback
+ * https://script.google.com/macros/d/ID/usercallback
  *
  *
  * @param {Object} oauthResponse - The request data received from the
@@ -86,10 +74,6 @@ function handleAuthorizationRequired() {
  *     the user. Also sets a timer to close the window automatically.
  */
 function handleNuxeoOAuthResponse(oauthResponse) {
-  if (DEBUG) {
-    console.time("handleNuxeoOAuthResponse");
-  }
-
   try {
     nuxeoClientWrapper().handleOAuthResponse(oauthResponse);
     return HtmlService.createHtmlOutputFromFile("html/auth-success");
@@ -97,10 +81,6 @@ function handleNuxeoOAuthResponse(oauthResponse) {
     var template = HtmlService.createTemplateFromFile("html/auth-failure");
     template.errorMessage = e.toString();
     return template.evaluate();
-  } finally {
-    if (DEBUG) {
-      console.timeEnd("handleNuxeoOAuthResponse");
-    }
   }
 }
 
@@ -124,22 +104,15 @@ function dispatchAction(event) {
  * @return {ActionResponse|UniversalActionResponse|Card} Card or form action
  */
 function dispatchActionInternal_(event, errorHandler) {
-  if (DEBUG) {
-    console.time("dispatchActionInternal");
-    console.log(event);
-  }
-
   try {
     var actionName = event.parameters.action;
     if (!actionName) {
       throw new Error("Missing action name.");
     }
-
     var actionFn = ActionHandlers[actionName];
     if (!actionFn) {
       throw new Error("Action not found: " + actionName);
     }
-
     return actionFn(event);
   } catch (err) {
     console.error(err);
@@ -147,10 +120,6 @@ function dispatchActionInternal_(event, errorHandler) {
       return errorHandler(err);
     } else {
       throw err;
-    }
-  } finally {
-    if (DEBUG) {
-      console.timeEnd("dispatchActionInternal");
     }
   }
 }

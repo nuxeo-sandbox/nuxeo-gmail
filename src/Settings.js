@@ -8,6 +8,7 @@
  */
 
 var CREDENTIALS_KEY = "nuxeoCredentials";
+var NUXEO_URL = "nuxeoUrl";
 
 /**
  * Get the effective settings for the current user.
@@ -15,7 +16,44 @@ var CREDENTIALS_KEY = "nuxeoCredentials";
  * @return {Object}
  */
 function getNuxeoCredentials() {
-  return cachedPropertiesForScript_().get(CREDENTIALS_KEY, null);
+  var credentials = cachedPropertiesForScript_().get(CREDENTIALS_KEY, null);
+  if (!credentials) {
+    credentials = {};
+    credentials.clientId = "nuxeo-gmail";
+    credentials.clientSecret = "secret";
+  }
+  return credentials;
+}
+
+/**
+ * Get the Nuxeo server infos.
+ *
+ * @return {Object}
+ */
+function getNuxeoURL() {
+  var nuxeoUrl = cachedPropertiesForScript_().get(NUXEO_URL, null);
+  if (!nuxeoUrl) {
+    nuxeoUrl = {};
+    nuxeoUrl.nuxeoUrl = "https://bloublou.nuxeo.com/nuxeo";
+  }
+  return nuxeoUrl;
+}
+
+/**
+ * Put values in cache.
+ * @param {string} key - key for storage.
+ */
+function putInCache(key, value) {
+  return cachedPropertiesForScript_().put(key, value);
+}
+
+/**
+ * Get the values from cache for a given key.
+ * @param {string} key - Key to lookup.
+ * @return {Object}
+ */
+function getFromCache(key) {
+  return cachedPropertiesForScript_().get(key, null);
 }
 
 /**
@@ -37,8 +75,14 @@ var cachedPropertiesPrototype = {
         this.cache.put(key, value);
       }
     }
-    if (value) {
-      return JSON.parse(value);
+    try {
+      if (value) {
+        return JSON.parse(value);
+      }
+    } catch (err) {
+      this.clear(key);
+      console.error(err);
+      return addOnErrorHandler(err);
     }
     return defaultValue;
   },

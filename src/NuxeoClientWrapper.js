@@ -18,7 +18,7 @@ function AuthorizationRequiredException() {}
  * Prototype object for the Nuxeo API client.
  */
 var NuxeoClientPrototype = {
-  apiEndpoint: "https://nightly.nuxeo.com/nuxeo",
+  apiEndpoint: null,
   oauthService: null,
   /**
    * Execute a NXQL query against the Nuxeo API.
@@ -28,58 +28,29 @@ var NuxeoClientPrototype = {
    * @return {Object} API response
    */
   query: function(query, vars) {
-    if (DEBUG) {
-      console.time("query");
-    }
-    try {
       if (!this.oauthService.hasAccess()) {
         throw new AuthorizationRequiredException();
       }
-
       var payload = JSON.stringify({
         query: query,
         variables: vars
       });
-
-      if (DEBUG) {
-        console.log(payload);
-      }
-
       var headers = {
-        Authorization: Utilities.formatString(
-          "Bearer %s",
-          this.oauthService.getAccessToken()
-        )
+        Authorization: Utilities.formatString("Bearer %s", this.oauthService.getAccessToken())
       };
-
       var response = UrlFetchApp.fetch(this.apiEndpoint, {
         method: "post",
         headers: headers,
         payload: payload,
         muteHttpExceptions: true
       });
-
-      if (DEBUG) {
-        console.log(response);
-      }
-
       var rawResponse = response.getContentText();
       var parsedResponse = JSON.parse(rawResponse);
-
-      if (DEBUG) {
-        console.log(parsedResponse);
-      }
-
       if (parsedResponse.message == "Bad credentials") {
         throw new AuthorizationRequiredException();
       }
 
       return parsedResponse.data;
-    } finally {
-      if (DEBUG) {
-        console.timeEnd("query");
-      }
-    }
   },
 
   /**
@@ -87,6 +58,13 @@ var NuxeoClientPrototype = {
    */
   disconnect: function() {
     this.oauthService.reset();
+  },
+
+  /**
+   * Check if has access.
+   */
+  hasAccess: function() {
+    return this.oauthService.hasAccess();
   },
 
   /**
@@ -124,15 +102,10 @@ var NuxeoClientPrototype = {
  */
 function nuxeoClientWrapper() {
   var credentials = getNuxeoCredentials();
-  if (!credentials) {
-    throw new Error(
-      "No credentials found. Set the script property `nuxeoCredentials`"
-    );
-  }
-  console.log("OAuth execution...");
+  var nuxeoUrl = getNuxeoURL();
   var oauthService = OAuth2.createService("nuxeo")
-    .setAuthorizationBaseUrl("https://nightly.nuxeo.com/nuxeo/oauth2/authorize")
-    .setTokenUrl("https://nightly.nuxeo.com/nuxeo/oauth2/access-token")
+    .setAuthorizationBaseUrl(nuxeoUrl.nuxeoUrl + "/oauth2/authorize")
+    .setTokenUrl(nuxeoUrl.nuxeoUrl + "/oauth2/access-token")
     .setClientId(credentials.clientId)
     .setClientSecret(credentials.clientSecret)
     .setCallbackFunction("handleNuxeoOAuthResponse")
@@ -140,6 +113,7 @@ function nuxeoClientWrapper() {
     .setCache(CacheService.getUserCache())
     .setScope("user user:email user:follow repo");
   return _.assign(Object.create(NuxeoClientPrototype), {
-    oauthService: oauthService
+    oauthService: oauthService,
+    apiEndpoint: nuxeoUrl.nuxeoUrl
   });
 }

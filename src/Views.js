@@ -7,32 +7,63 @@
  *     Nuxeo
  */
 
-var Icons = {
-  repository: buildIconUrl_("repo"),
-  contributedRepositories: buildIconUrl_("repo-push"),
-  state: buildIconUrl_("pulse"),
-  person: buildIconUrl_("person"),
-  calendar: buildIconUrl_("calendar"),
-  stars: buildIconUrl_("star"),
-  forks: buildIconUrl_("repo-forked"),
-  watchers: buildIconUrl_("eye"),
-  issues: buildIconUrl_("bug"),
-  pullRequests: buildIconUrl_("repo-pull"),
-  email: buildIconUrl_("mail"),
-  company: buildIconUrl_("organization"),
-  location: buildIconUrl_("location"),
-  bio: buildIconUrl_("note"),
-  followers: buildIconUrl_("radio-tower"),
-  labels: buildIconUrl_("tag")
-};
-
-/**
- * Constructs the full URL for an icon.
- * @param {String} name - base file name of the icon
- * @return {String} full URL to the hosted icon.
- */
-function buildIconUrl_(name) {
-  return "https://cdn.rawgit.com/webdog/octicons-png/bd02e5bc/" + name + ".svg.png";
+function buildHomeCard() {
+  var sectionLogo = CardService.newCardSection().addWidget(
+    CardService.newKeyValue()
+      .setIconUrl("https://media.glassdoor.com/sql/1066046/nuxeo-squarelogo-1516893998893.png")
+      .setMultiline(true)
+      .setTopLabel("Nuxeo presents")
+      .setContent("<b>Nuxeo Gmail Inbox!</b>")
+  );
+  var sectionWelcome = CardService.newCardSection()
+    .addWidget(
+      CardService.newKeyValue()
+        .setIcon(CardService.Icon.EMAIL)
+        .setMultiline(true)
+        .setContent("Push attachments from emails to Nuxeo")
+    )
+    .addWidget(
+      CardService.newKeyValue()
+        .setIcon(CardService.Icon.MEMBERSHIP)
+        .setMultiline(true)
+        .setContent("Display information from Nuxeo links in email")
+    )
+    .addWidget(
+      CardService.newKeyValue()
+        .setIcon(CardService.Icon.OFFER)
+        .setMultiline(true)
+        .setContent("Browse and attach any document to emails")
+    );
+  var sectionOAuthCreds = CardService.newCardSection()
+    .addWidget(CardService.newTextParagraph().setText("Please fill information to access Nuxeo:"))
+    .addWidget(
+      CardService.newTextInput()
+        .setFieldName("nuxeoUrl")
+        .setTitle("Nuxeo URL")
+        .setHint("https://CLIENT.nuxeocloud.com/nuxeo")
+    )
+    .addWidget(
+      CardService.newTextInput()
+        .setFieldName("clientId")
+        .setTitle("Client Id")
+    )
+    .addWidget(
+      CardService.newTextInput()
+        .setFieldName("clientSecret")
+        .setTitle("Client Secret")
+    )
+    .addWidget(
+      CardService.newButtonSet().addButton(
+        CardService.newTextButton()
+          .setText('<font color="#334CFF">Save Infos</font>')
+          .setOnClickAction(CardService.newAction().setFunctionName("saveCreds"))
+      )
+    );
+  var card = CardService.newCardBuilder()
+    .addSection(sectionLogo)
+    .addSection(sectionWelcome)
+    .addSection(sectionOAuthCreds);
+  return card.build();
 }
 
 /**
@@ -46,20 +77,13 @@ function buildIconUrl_(name) {
 function buildAuthorizationCard(opts) {
   var header = CardService.newCardHeader().setTitle("Authorization required");
   var section = CardService.newCardSection()
-    .addWidget(
-      CardService.newTextParagraph().setText(
-        'Please authorize access to your Nuxeo account.'
-      )
-    )
+    .addWidget(CardService.newTextParagraph().setText("Please authorize access to your Nuxeo account."))
     .addWidget(
       CardService.newButtonSet().addButton(
         CardService.newTextButton()
           .setText("Authorize")
-          .setAuthorizationAction(
-            CardService.newAuthorizationAction()
-              .setAuthorizationUrl(opts.url)
-          )
-      ) 
+          .setAuthorizationAction(CardService.newAuthorizationAction().setAuthorizationUrl(opts.url))
+      )
     );
   var card = CardService.newCardBuilder()
     .setHeader(header)
@@ -88,13 +112,18 @@ function buildErrorCard(opts) {
   }
 
   var card = CardService.newCardBuilder();
-  card.setHeader(
-    CardService.newCardHeader().setTitle("An unexpected error occurred")
-  );
+  card.setHeader(CardService.newCardHeader().setTitle("An unexpected error occurred"));
   card.addSection(
-    CardService.newCardSection().addWidget(
-      CardService.newTextParagraph().setText(errorText)
-    )
+    CardService.newCardSection()
+      .addWidget(CardService.newTextParagraph().setText(errorText))
+      .addWidget(
+        CardService.newButtonSet().addButton(
+          CardService.newTextButton()
+            .setText('<font color="#334CFF">Reset/Disconnect</font>')
+            .setOnClickAction(CardService.newAction().setFunctionName("disconnect"))
+        )
+      )
+      .addWidget(CardService.newTextParagraph().setText("(Refresh the page after clicking on the button)"))
   );
 
   if (opts.showStackTrace && opts.exception && opts.exception.stack) {
@@ -105,335 +134,7 @@ function buildErrorCard(opts) {
         .addWidget(CardService.newTextParagraph().setText(stack))
     );
   }
-
   return card.build();
-}
-
-/**
- * Creates a card for displaying the add-on settings.
- *
- * @param {Object} opts Parameters for building the card
- * @param {string} opts.avatarUrl - URL of the user's avatar
- * @param {string} opts.login - User's github login ID.
- * @return {Card}
- */
-function buildSettingsCard(opts) {
-  var header = CardService.newCardHeader()
-    .setTitle("Settings")
-    .setImageStyle(CardService.ImageStyle.CIRCLE)
-    .setImageUrl(opts.avatarUrl)
-    .setSubtitle(opts.login);
-
-  var card = CardService.newCardBuilder()
-    .setHeader(header)
-    .addSection(
-      CardService.newCardSection().addWidget(
-        CardService.newButtonSet().addButton(
-          CardService.newTextButton()
-            .setText("Disconnect account")
-            .setOnClickAction(createAction_("disconnectAccount"))
-        )
-      )
-    );
-  return card.build();
-}
-
-/**
- * Creates a card displaying details about an issue.
- *
- * @param {Object} opts Parameters for building the card
- * @param {string} opts.id - Issue Id
- * @param {number} opts.number - Issue number
- * @param {string} opts.title - Issue title
- * @param {string} opts.url - Link to issue on github
- * @param {string} opts.authorAvatarUrl - URL of the author's avatar image
- * @param {string} opts.repositoryName - Name of the containing repository (org/name syntax)
- * @param {string[]} opts.labels - Labels assigned to issue
- * @param {string} opts.state - Issue state
- * @param {Object} opts.author - Issue author
- * @param {Object} opts.assignee - User the pull request is assigned to
- * @param {Date} opts.createdAt - Date/time the issue was created
- * @param {Date} opts.updatedAt - Date/time the issue was last updated
- * @return {Card}
- */
-function buildIssueCard(opts) {
-  var header = CardService.newCardHeader()
-    .setTitle(Utilities.formatString("Issue #%d", opts.number))
-    .setImageStyle(CardService.ImageStyle.CIRCLE)
-    .setImageUrl(opts.authorAvatarUrl)
-    .setSubtitle(opts.title);
-
-  var labels = _.join(opts.labels, "<br/>");
-
-  var card = CardService.newCardBuilder()
-    .setHeader(header)
-    .addCardAction(
-      CardService.newCardAction()
-        .setText("View issue on GitHub")
-        .setOpenLink(createExternalLink_(opts.url))
-    )
-    .addSection(
-      CardService.newCardSection()
-        .setHeader("Details")
-        .addWidget(createRepositoryKeyValue_("Repository", opts.repositoryName))
-        .addWidget(createKeyValue_("State", Icons.state, opts.state))
-        .addWidget(createUserKeyValue_("Reported by", opts.author))
-        .addWidget(createUserKeyValue_("Assignee", opts.assignee))
-        .addWidget(
-          createKeyValue_(
-            "Created at",
-            Icons.calendar,
-            formatDateTime_(opts.createdAt)
-          )
-        )
-        .addWidget(
-          createKeyValue_(
-            "Updated at",
-            Icons.calendar,
-            formatDateTime_(opts.updatedAt)
-          )
-        )
-        .addWidget(createKeyValue_("Labels", Icons.labels, labels))
-    );
-  return card.build();
-}
-
-/**
- * Creates a card displaying details about a pull request.
- *
- * @param {Object} opts Parameters for building the card
- * @param {string} opts.id - Issue Id
- * @param {number} opts.number - Issue number
- * @param {string} opts.title - Issue title
- * @param {string} opts.url - Link to issue on github
- * @param {string} opts.authorAvatarUrl - URL of the author's avatar image
- * @param {string} opts.repositoryName - Name of the containing repository (org/name syntax)
- * @param {string[]} opts.labels - Labels assigned to issue
- * @param {string} opts.state - Issue state
- * @param {Object} opts.author - Issue author
- * @param {Object} opts.assignee - User the pull request is assigned to
- * @param {Date} opts.createdAt - Date/time the pull request was created
- * @param {Date} opts.updatedAt - Date/time the pull request was last updated
- * @param {Date} opts.mergedAt - Date/time the pull request was merged (if so)
- * @param {Date} opts.closedAt - Date/time the pull request was closed (if so)
- * @return {Card}
- */
-function buildPullRequestCard(opts) {
-  var header = CardService.newCardHeader()
-    .setTitle(Utilities.formatString("Pull request #%d", opts.number))
-    .setImageStyle(CardService.ImageStyle.CIRCLE)
-    .setImageUrl(opts.authorAvatarUrl)
-    .setSubtitle(opts.title);
-
-  var labels = _.join(opts.labels, "<br/>");
-
-  var closedOrMergedAt = opts.state == "MERGED" ? opts.mergedAt : opts.closedAt;
-  var lastEditedAt = opts.updatedAt ? opts.updatedAt : closedOrMergedAt;
-
-  var card = CardService.newCardBuilder()
-    .setHeader(header)
-    .addCardAction(
-      CardService.newCardAction()
-        .setText("View pull request on GitHub")
-        .setOpenLink(createExternalLink_(opts.url))
-    )
-    .addSection(
-      CardService.newCardSection()
-        .setHeader("Details")
-        .addWidget(createRepositoryKeyValue_("Repository", opts.repositoryName))
-        .addWidget(createKeyValue_("State", Icons.state, opts.state))
-        .addWidget(createUserKeyValue_("Created by", opts.author))
-        .addWidget(createUserKeyValue_("Assignee", opts.assignee))
-        .addWidget(
-          createKeyValue_(
-            "Created at",
-            Icons.calendar,
-            formatDateTime_(opts.createdAt)
-          )
-        )
-        .addWidget(
-          createKeyValue_(
-            "Updated at",
-            Icons.calendar,
-            formatDateTime_(lastEditedAt)
-          )
-        )
-        .addWidget(
-          createKeyValue_(
-            "Closed at",
-            Icons.calendar,
-            formatDateTime_(closedOrMergedAt)
-          )
-        )
-        .addWidget(createKeyValue_("Labels", Icons.labels, labels))
-    );
-  return card.build();
-}
-
-/**
- * Creates a card displaying details about a repository.
- *
- * @param {Object} opts Parameters for building the card
- * @param {string} opts.name - Name of the containing repository (org/name syntax)
- * @param {string} opts.ownerAvatarUrl - URL of the author's avatar image
- * @param {number} opts.stargazers - Number of stars
- * @param {number} opts.forks - Number of forks
- * @param {number} opts.watchers - Number of watchers
- * @param {number} opts.openIssues - Number of open issues
- * @param {number} opts.pullRequests - Number of open pull requests
- * @param {Date} opts.updatedAt - Date/time the repo was last updated
- * @return {Card}
- */
-function buildRepositoryCard(opts) {
-  var header = CardService.newCardHeader()
-    .setTitle(opts.name)
-    .setImageStyle(CardService.ImageStyle.CIRCLE)
-    .setImageUrl(opts.ownerAvatarUrl);
-
-  var card = CardService.newCardBuilder()
-    .setHeader(header)
-    .addCardAction(
-      CardService.newCardAction()
-        .setText("View repository on GitHub")
-        .setOpenLink(createExternalLink_(opts.url))
-    )
-    .addSection(
-      CardService.newCardSection()
-        .addWidget(
-          createKeyValue_("Stars", Icons.stars, opts.stargazers.toString())
-        )
-        .addWidget(createKeyValue_("Forks", Icons.forks, opts.forks.toString()))
-        .addWidget(
-          createKeyValue_("Watchers", Icons.watchers, opts.watchers.toString())
-        )
-        .addWidget(
-          createKeyValue_(
-            "Open Issues",
-            Icons.watchers,
-            opts.openIssues.toString()
-          )
-        )
-        .addWidget(
-          createKeyValue_(
-            "Open pull requests",
-            Icons.pullRequests,
-            opts.pullRequests.toString()
-          )
-        )
-        .addWidget(
-          createKeyValue_(
-            "Updated at",
-            Icons.calendar,
-            formatDateTime_(opts.updatedAt)
-          )
-        )
-    );
-  return card.build();
-}
-
-/**
- * Creates a card displaying details about a user.
- *
- * @param {Object} opts Parameters for building the card
- * @param {string} opts.login - User's login Id
- * @param {string} opts.avatarUrl - URL of the avatar image
- * @param {string} opts.name - User's name
- * @param {string} opts.email - User's email
- * @param {string} opts.company - User's employer
- * @param {string} opts.location - User's location
- * @param {string} opts.bio - User's bio
- * @param {Date} opts.memberSince - Date user joined GitHub
- * @param {number} opts.repositoryCount - Number of repositories the user owns or forked
- * @param {number} opts.contributedRepositorytCount - Number of repositories the user contributed to
- * @param {number} opts.followerCount - Number of people following the user 
- * @return {Card}
- */
-function buildUserCard(opts) {
-  var header = CardService.newCardHeader()
-    .setImageUrl(opts.avatarUrl)
-    .setImageStyle(CardService.ImageStyle.CIRCLE)
-    .setTitle(opts.login)
-    .setSubtitle(defaultTo_(opts.name, ""));
-  var card = CardService.newCardBuilder()
-    .setHeader(header)
-    .addCardAction(
-      CardService.newCardAction()
-        .setText("View user on GitHub")
-        .setOpenLink(createExternalLink_(opts.url))
-    )
-    .addSection(
-      CardService.newCardSection()
-        .setHeader("About")
-        .addWidget(createKeyValue_("Email", Icons.email, opts.email))
-        .addWidget(createKeyValue_("Company", Icons.company, opts.company))
-        .addWidget(createKeyValue_("Location", Icons.location, opts.location))
-        .addWidget(createKeyValue_("Bio", Icons.bio, opts.bio))
-    )
-    .addSection(
-      CardService.newCardSection()
-        .setHeader("Statistics")
-        .addWidget(
-          createKeyValue_(
-            "Member since",
-            Icons.calendar,
-            formatDateTime_(opts.memberSince)
-          )
-        )
-        .addWidget(
-          createKeyValue_(
-            "Repositories",
-            Icons.repository,
-            opts.repositoryCount.toString()
-          )
-        )
-        .addWidget(
-          createKeyValue_(
-            "Contributed repositories",
-            Icons.contributedRepositories,
-            opts.contributedRepositoryCount.toString()
-          )
-        )
-        .addWidget(
-          createKeyValue_(
-            "Followers",
-            Icons.followers,
-            opts.followerCount.toString()
-          )
-        )
-    );
-  return card.build();
-}
-
-/**
- * Choses between a value and a default placeholder. The placeholder
- * is used if the value is falsy.
- *
- * @param {Object} value - Value to check/return
- * @param {Object} defaultValue - Value to return if original value not valid.
- * @return {Object}
- * @private
- */
-function defaultTo_(value, defaultValue) {
-  if (_.isEmpty(value)) {
-    value = null;
-  }
-  return _.defaultTo(value, defaultValue);
-}
-
-/**
- * Creates a key/value widget. Simple wrapper to reduce boilerplace code.
- *
- * @param {string} label - Top label of widget
- * @param {string} icon - URL of the icon
- * @param {string} value - Main content
- * @return {KeyValue}
- * @private
- */
-function createKeyValue_(label, icon, value) {
-  return CardService.newKeyValue()
-    .setTopLabel(label)
-    .setIconUrl(icon)
-    .setContent(defaultTo_(value, "---"));
 }
 
 /**
@@ -466,49 +167,22 @@ function createExternalLink_(url) {
 }
 
 /**
- * Creates a clickable key/value widget for a user. Links
- * to a user card if the user is not null.
+ * Save oauth infos and trigger Auth.
  *
- * @param {string} url - URL to link to 
- * @return {KeyValue}
- * @private
+ * @param {event} event
+ * @return {Card} the auth card 
  */
-function createUserKeyValue_(label, person) {
-  var widget = createKeyValue_(label, Icons.person, person);
-  if (person) {
-    widget.setOnClickAction(createAction_("showUser", { login: person }));
+function saveCreds(event) {
+  if (event) {
+    var nuxeoUrl = getNuxeoURL();
+    nuxeoUrl.nuxeoUrl = event.formInput.nuxeoUrl;
+    putInCache(NUXEO_URL, nuxeoUrl);
+
+    var credentials = getNuxeoCredentials();
+    credentials.clientId = event.formInput.clientId;
+    credentials.clientSecret = event.formInput.clientSecret;
+    putInCache(CREDENTIALS_KEY, credentials);
+
+    return handleAuthorizationRequired();
   }
-  return widget;
-}
-
-/**
- * Creates a clickable key/value widget for a repository. Links to the
- * repository card.
- *
- * @param {string} url - URL to link to 
- * @return {KeyValue}
- * @private
- */
-function createRepositoryKeyValue_(label, nameWithOwner) {
-  var nameAndOwner = nameWithOwner.split("/");
-  var action = createAction_("showRepository", {
-    owner: nameAndOwner[0],
-    repo: nameAndOwner[1]
-  });
-
-  return createKeyValue_(
-    label,
-    Icons.repository,
-    nameWithOwner
-  ).setOnClickAction(action);
-}
-/**
- * Formats a date/time into a relative time (e.g. 1 day ago).
- *
- * @param {Date} value - Date/time to format
- * @return {string}
- * @private
- */
-function formatDateTime_(value) {
-  return value ? moment(value).fromNow() : "---";
 }
