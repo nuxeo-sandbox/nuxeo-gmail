@@ -8,9 +8,9 @@
  */
 
  var SHOW_ADDON = "showAddOn";
- var SHOW_SETTINGS = "showSettings";
  var SHOW_AUTHORIZATION_CARD = "showAuthorizationCard";
  var DISCONNECT_ACTION = "disconnectAccount";
+ var SHOW_DISCONNECT_INFOS = "showDisconnectInfo";
 
 /**
  * Collection of functions to handle user interactions with the add-on. 
@@ -26,7 +26,7 @@ var ActionHandlers = {
    */
   showAddOn: function(e) {
     if(!nuxeoClientWrapper().hasAccess()){
-      return home();
+      return buildHomeCard();
     }
     var message = getCurrentMessage(e);
 
@@ -41,13 +41,13 @@ var ActionHandlers = {
   },
 
   /**
-   * Displays the add-on settings card.
-   *
-   * @param {Event} e - Event from Gmail
-   * @return {CardService.FormAction}
+   * Return the disconnect card info.
+   * 
+   * @param {*} e - Event from Gmail
+   * @return {CardService.Card}
    */
-  showSettings: function(e) {
-    return home();
+  showDisconnectInfo: function(e) {
+    return buildDisconnectCardInfo();
   },
 
   /**
@@ -72,10 +72,6 @@ var ActionHandlers = {
     });
   }
 };
-
-function home() {
-  return buildHomeCard();
-}
 
 function handleDocs_(owner, repoName, id) {
   var nuxeoResponse = nuxeoClientWrapper().query(Queries.ISSUE, {

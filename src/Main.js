@@ -22,17 +22,13 @@ function getContextualAddOn(event) {
 }
 
 /**
- * Entry point for custom authorization screen.
- * 
- * TODO - Remove once authorization error allows passing card directly
- *
- * @return {UniversalActionResponse} Card for authorization screen
+ * Returning the card of disconnect info.
  */
-function handleShowSettings() {
+function handleDisconnectInfo() {
   return dispatchActionInternal_(
     {
       parameters: {
-        action: SHOW_SETTINGS
+        action: SHOW_DISCONNECT_INFOS
       }
     },
     universalActionErrorHandler
@@ -43,6 +39,7 @@ function disconnect() {
   nuxeoClientWrapper().disconnect();
   cachedPropertiesForScript_().clear(NUXEO_URL);
   cachedPropertiesForScript_().clear(CREDENTIALS_KEY);
+  return handleDisconnectInfo();
 }
 
 /**
@@ -174,10 +171,12 @@ function actionErrorHandler(err) {
  * Open external Nuxeo link.
  */
 function openNuxeo() {
-  return CardService.newActionResponseBuilder().setOpenLink(
-    CardService.newOpenLink()
-      .setUrl(getNuxeoURL().nuxeoUrl)
-      .setOpenAs(CardService.OpenAs.FULL_SIZE)
-      .setOnClose(CardService.OnClose.NOTHING)
-  ).build();
+  return CardService.newActionResponseBuilder()
+    .setOpenLink(
+      CardService.newOpenLink()
+        .setUrl(getNuxeoURL().nuxeoUrl)
+        .setOpenAs(CardService.OpenAs.FULL_SIZE)
+        .setOnClose(CardService.OnClose.NOTHING)
+    )
+    .build();
 }

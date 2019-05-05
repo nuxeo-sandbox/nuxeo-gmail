@@ -186,3 +186,19 @@ function saveCreds(event) {
     return handleAuthorizationRequired();
   }
 }
+
+/**
+ * Just a card to remind the user of refresh the page after disconnecting.
+ */
+function buildDisconnectCardInfo() {
+  var card = CardService.newCardBuilder();
+  card.setHeader(CardService.newCardHeader().setTitle("Disconnect"));
+  card.addSection(
+    CardService.newCardSection().addWidget(CardService.newTextParagraph().setText("You have to refresh the web page."))
+  );
+  var cardsUniversalAction = CardService.newUniversalActionResponseBuilder()
+    .displayAddOnCards([card.build()])
+    .build();
+
+  return cardsUniversalAction;
+}
