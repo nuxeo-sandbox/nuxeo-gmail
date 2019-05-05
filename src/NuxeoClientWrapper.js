@@ -57,7 +57,9 @@ var NuxeoClientPrototype = {
    * De-authorizes the Nuxeo client.
    */
   disconnect: function() {
-    this.oauthService.reset();
+    // Skipping this method call as it removes nothing from the storage apparently.
+    // this.oauthService.reset();
+    this.oauthService.saveToken_(null);
   },
 
   /**

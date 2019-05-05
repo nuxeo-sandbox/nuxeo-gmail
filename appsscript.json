@@ -35,8 +35,8 @@
       "onTriggerFunction": "getContextualAddOn"
     }],
     "universalActions": [{
-      "text": "Nuxeo Connect",
-      "runFunction": "handleShowSettings"
+      "text": "Open Nuxeo",
+      "runFunction": "openNuxeo"
     },{
       "text": "Disconnect",
       "runFunction": "disconnect"
