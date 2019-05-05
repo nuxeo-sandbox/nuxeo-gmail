@@ -202,3 +202,41 @@ function buildDisconnectCardInfo() {
 
   return cardsUniversalAction;
 }
+
+/**
+ * Display the possible actions card.
+ */
+function buildNuxeoAction() {
+  var card = CardService.newCardBuilder();
+  var sectionLogo = CardService.newCardSection().addWidget(
+    CardService.newKeyValue()
+      .setIconUrl("https://media.glassdoor.com/sql/1066046/nuxeo-squarelogo-1516893998893.png")
+      .setMultiline(true)
+      .setContent("<b>What do you like to do:</b>")
+  );
+  var sectionActions = CardService.newCardSection()
+    .addWidget(
+      CardService.newKeyValue()
+        .setIcon(CardService.Icon.EMAIL)
+        .setMultiline(true)
+        .setContent("Push attachments from emails to Nuxeo")
+        .setOnClickAction(
+          CardService.newAction()
+            .setFunctionName("handleAttachments")
+        )
+    )
+    .addWidget(
+      CardService.newKeyValue()
+        .setIcon(CardService.Icon.MEMBERSHIP)
+        .setMultiline(true)
+        .setContent("Display information from Nuxeo links in email")
+        .setOnClickAction(
+          CardService.newAction()
+            .setFunctionName("handleLinks")
+        )
+    );
+  return card
+    .addSection(sectionLogo)
+    .addSection(sectionActions)
+    .build();
+}

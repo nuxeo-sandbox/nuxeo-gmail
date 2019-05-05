@@ -7,10 +7,10 @@
  *     Nuxeo
  */
 
- var SHOW_ADDON = "showAddOn";
- var SHOW_AUTHORIZATION_CARD = "showAuthorizationCard";
- var DISCONNECT_ACTION = "disconnectAccount";
- var SHOW_DISCONNECT_INFOS = "showDisconnectInfo";
+var SHOW_ADDON = "showAddOn";
+var SHOW_AUTHORIZATION_CARD = "showAuthorizationCard";
+var DISCONNECT_ACTION = "disconnectAccount";
+var SHOW_DISCONNECT_INFOS = "showDisconnectInfo";
 
 /**
  * Collection of functions to handle user interactions with the add-on. 
@@ -25,19 +25,13 @@ var ActionHandlers = {
    * @return {Card[]}
    */
   showAddOn: function(e) {
-    if(!nuxeoClientWrapper().hasAccess()){
+    // Check if the OAuth client is set - if not go to welcome page.
+    if (!nuxeoClientWrapper().hasAccess()) {
       return buildHomeCard();
     }
-    var message = getCurrentMessage(e);
 
-    // Handle cards for Nuxeo Links
-    var docLinks = extractNuxeoLinks(message.getBody());
-    if (!_.isEmpty(docLinks)) {
-      return handleDocs_();
-    }
-
-    // Handle the attachments if no Nuxeo links
-    return handleAttachments_(message.getAttachments());
+    // Show Nuxeo Card Actions.
+    return buildNuxeoAction();
   },
 
   /**
@@ -73,7 +67,11 @@ var ActionHandlers = {
   }
 };
 
-function handleDocs_(owner, repoName, id) {
+function handleLinks(owner, repoName, id) {
+  var docLinks = extractNuxeoLinks(message.getBody());
+  if (!_.isEmpty(docLinks)) {
+    return handleDocs_();
+  }
   var nuxeoResponse = nuxeoClientWrapper().query(Queries.ISSUE, {
     owner: owner,
     repo: repoName,
@@ -101,10 +99,14 @@ function handleDocs_(owner, repoName, id) {
   return card;
 }
 
-function handleAttachments_(attachments) {
+function handleAttachments(event) {
+  var message = getCurrentMessage(event);
+  var attachments = message.getAttachments();
   for (var i = 0; i < attachments.length; i++) {
     console.log(JSON.stringify(attachments[i]));
   }
   var section = CardService.newCardSection().addWidget(CardService.newTextParagraph().setText("Test"));
-  return CardService.newCardBuilder().addSection(section).build();
+  return CardService.newCardBuilder()
+    .addSection(section)
+    .build();
 }
