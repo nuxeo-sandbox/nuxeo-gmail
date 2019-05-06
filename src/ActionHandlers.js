@@ -102,6 +102,9 @@ function handleLinks(owner, repoName, id) {
 function handleAttachments(event) {
   var message = getCurrentMessage(event);
   var attachments = message.getAttachments();
+  if (_.isEmpty(attachments)) {
+    return showEmptyResult();
+  }
   for (var i = 0; i < attachments.length; i++) {
     console.log(JSON.stringify(attachments[i]));
   }

@@ -220,23 +220,31 @@ function buildNuxeoAction() {
         .setIcon(CardService.Icon.EMAIL)
         .setMultiline(true)
         .setContent("Push attachments from emails to Nuxeo")
-        .setOnClickAction(
-          CardService.newAction()
-            .setFunctionName("handleAttachments")
-        )
+        .setOnClickAction(CardService.newAction().setFunctionName("handleAttachments"))
     )
     .addWidget(
       CardService.newKeyValue()
         .setIcon(CardService.Icon.MEMBERSHIP)
         .setMultiline(true)
         .setContent("Display information from Nuxeo links in email")
-        .setOnClickAction(
-          CardService.newAction()
-            .setFunctionName("handleLinks")
-        )
+        .setOnClickAction(CardService.newAction().setFunctionName("handleLinks"))
     );
   return card
     .addSection(sectionLogo)
     .addSection(sectionActions)
+    .build();
+}
+
+/**
+ * When no input can be processed.
+ */
+function showEmptyResult() {
+  var header = CardService.newCardHeader().setTitle("Oops");
+  var section = CardService.newCardSection().addWidget(
+    CardService.newTextParagraph().setText("There is no attachment to this email. Please select another one.")
+  );
+  return CardService.newCardBuilder()
+    .setHeader(header)
+    .addSection(section)
     .build();
 }
