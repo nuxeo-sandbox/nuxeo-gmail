@@ -24,6 +24,12 @@ function buildHomeCard() {
     )
     .addWidget(
       CardService.newKeyValue()
+        .setIcon(CardService.Icon.DESCRIPTION)
+        .setMultiline(true)
+        .setContent("Create Nuxeo notes from emails")
+    )
+    .addWidget(
+      CardService.newKeyValue()
         .setIcon(CardService.Icon.MEMBERSHIP)
         .setMultiline(true)
         .setContent("Display information from Nuxeo links in email")
@@ -224,6 +230,13 @@ function buildNuxeoAction() {
     )
     .addWidget(
       CardService.newKeyValue()
+        .setIcon(CardService.Icon.DESCRIPTION)
+        .setMultiline(true)
+        .setContent("Create Nuxeo notes from emails")
+        .setOnClickAction(CardService.newAction().setFunctionName("handleNotes"))
+    )
+    .addWidget(
+      CardService.newKeyValue()
         .setIcon(CardService.Icon.MEMBERSHIP)
         .setMultiline(true)
         .setContent("Display information from Nuxeo links in email")
@@ -236,12 +249,12 @@ function buildNuxeoAction() {
 }
 
 /**
- * When no input can be processed.
+ * show simple card.
  */
-function showEmptyResult() {
-  var header = CardService.newCardHeader().setTitle("Oops");
+function showSimpleCard(title, message) {
+  var header = CardService.newCardHeader().setTitle(title);
   var section = CardService.newCardSection().addWidget(
-    CardService.newTextParagraph().setText("There is no attachment to this email. Please select another one.")
+    CardService.newTextParagraph().setText(message)
   );
   return CardService.newCardBuilder()
     .setHeader(header)

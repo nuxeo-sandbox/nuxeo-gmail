@@ -103,13 +103,19 @@ function handleAttachments(event) {
   var message = getCurrentMessage(event);
   var attachments = message.getAttachments();
   if (_.isEmpty(attachments)) {
-    return showEmptyResult();
+    return showSimpleCard("Oops!", "There is no attachment to this email. Please select another one.");
   }
   for (var i = 0; i < attachments.length; i++) {
     console.log(JSON.stringify(attachments[i]));
   }
-  var section = CardService.newCardSection().addWidget(CardService.newTextParagraph().setText("Test"));
-  return CardService.newCardBuilder()
-    .addSection(section)
-    .build();
+  return showSimpleCard("yes", "you have attachments");
+}
+
+function handleNotes(event) {
+  var message = getCurrentMessage(event);
+  var content = message.getBody();
+  var sender = message.getFrom();
+  var date = message.getDate();
+  // TODO: send here the note to user workspace or return a new card for browsing
+  return showSimpleCard("Yeeha!", "You have pushed a new note!");
 }
