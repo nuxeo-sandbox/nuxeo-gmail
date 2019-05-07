@@ -70,20 +70,22 @@ var ActionHandlers = {
 function handleAttachments(event) {
   var message = getCurrentMessage(event);
   var attachments = message.getAttachments();
+
   if (_.isEmpty(attachments)) {
     return showSimpleCard("Oops!", "There is no attachment to this email. Please select another one.");
   }
 
-  var nuxeoResponse = nuxeoClientWrapper().query(Queries.ISSUE, {
-    owner: owner,
-    repo: repoName,
-    issue: id
-  });
-
-  for (var i = 0; i < attachments.length; i++) {
-    console.log(JSON.stringify(attachments[i]));
+  var rootDocument = nuxeoClientWrapper().root();
+  if(!rootDocument){
+    return showSimpleCard("Oops!", "There is a problem with the Nuxeo instance. Please check with the support.");
   }
-  return showSimpleCard("yes", "you have attachments");
+
+  var children = nuxeoClientWrapper().children(rootDocument.uid);
+  if(_.isEmpty(children)){
+    return showSimpleCard("Nothing here!", "There is no other folders here.");
+  }
+
+  return buildChildrenCard(children);
 }
 
 function handleNotes(event) {

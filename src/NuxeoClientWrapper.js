@@ -7,6 +7,8 @@
  *     Nuxeo
  */
 
+ var MAIN_PP = "tree_children";
+
 /**
  * Exception to raise when authorization is required.
  *
@@ -20,37 +22,61 @@ function AuthorizationRequiredException() {}
 var NuxeoClientPrototype = {
   apiEndpoint: null,
   oauthService: null,
+
   /**
-   * Execute a NXQL query against the Nuxeo API.
+   * Fetch the root document.
    *
-   * @param {Query} query - NXQL query to run
-   * @param {Object} vars - Named variables to include in the query
    * @return {Object} API response
    */
-  query: function(query, vars) {
+  root: function() {
+    if (!this.oauthService.hasAccess()) {
+      throw new AuthorizationRequiredException();
+    }
+    var headers = {
+      Authorization: Utilities.formatString("Bearer %s", this.oauthService.getAccessToken())
+    };
+    var url = this.apiEndpoint + "/path/?";
+    var response = UrlFetchApp.fetch(url, {
+      method: "get",
+      headers: headers,
+      muteHttpExceptions: true
+    });
+    var raw = response.getContentText();
+    var parsedResponse = JSON.parse(raw);
+    return parsedResponse;
+  },
+
+  /**
+   * Fetch the children for a given doc.
+   *
+   * @param {String} id - Query param doc id to include in the query
+   * @return {Object} API response
+   */
+  children: function(id) {
       if (!this.oauthService.hasAccess()) {
         throw new AuthorizationRequiredException();
       }
-      var payload = JSON.stringify({
-        query: query,
-        variables: vars
-      });
       var headers = {
         Authorization: Utilities.formatString("Bearer %s", this.oauthService.getAccessToken())
       };
-      var response = UrlFetchApp.fetch(this.apiEndpoint, {
-        method: "post",
+      var url = this.apiEndpoint + "/search/pp/" + MAIN_PP + "/execute?queryParams=" + id;
+      console.log(url);
+      var response = UrlFetchApp.fetch(url, {
+        method: "get",
         headers: headers,
-        payload: payload,
         muteHttpExceptions: true
       });
-      var rawResponse = response.getContentText();
-      var parsedResponse = JSON.parse(rawResponse);
-      if (parsedResponse.message == "Bad credentials") {
-        throw new AuthorizationRequiredException();
-      }
+      var raw = response.getContentText();
+      var parsedResponse = JSON.parse(raw);
+      return parsedResponse.entries;
+  },
 
-      return parsedResponse.data;
+  /**
+   * Create note from email
+   * @param {String} html 
+   */
+  createNote: function(parentId, html) {
+    // TODO
   },
 
   /**
@@ -116,6 +142,6 @@ function nuxeoClientWrapper() {
     .setScope("user user:email user:follow repo");
   return _.assign(Object.create(NuxeoClientPrototype), {
     oauthService: oauthService,
-    apiEndpoint: nuxeoUrl.nuxeoUrl
+    apiEndpoint: nuxeoUrl.nuxeoUrl + "/api/v1"
   });
 }

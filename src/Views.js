@@ -164,12 +164,16 @@ function createAction_(name, opt_params) {
  *
  * @param {string} url - URL to link to 
  * @return {OpenLink}
- * @private
  */
-function createExternalLink_(url) {
-  return CardService.newOpenLink()
-    .setUrl(url)
-    .setOpenAs(CardService.OpenAs.FULL_SIZE);
+function createExternalLink(url) {
+  return CardService.newActionResponseBuilder()
+    .setOpenLink(
+      CardService.newOpenLink()
+        .setUrl(url)
+        .setOpenAs(CardService.OpenAs.FULL_SIZE)
+        .setOnClose(CardService.OnClose.NOTHING)
+    )
+    .build();
 }
 
 /**
@@ -245,12 +249,87 @@ function buildNuxeoAction() {
  * show simple card.
  */
 function showSimpleCard(title, message) {
+  var card = CardService.newCardBuilder();
   var header = CardService.newCardHeader().setTitle(title);
-  var section = CardService.newCardSection().addWidget(
-    CardService.newTextParagraph().setText(message)
-  );
-  return CardService.newCardBuilder()
+  var section = CardService.newCardSection().addWidget(CardService.newTextParagraph().setText(message));
+  var build = card
     .setHeader(header)
     .addSection(section)
     .build();
+  return CardService.newActionResponseBuilder()
+    .setNavigation(CardService.newNavigation().pushCard(build))
+    .build();
+}
+
+/**
+ * Tree children card.
+ */
+function buildChildrenCard(children) {
+  var card = CardService.newCardBuilder();
+  var sectionLogo = CardService.newCardSection().addWidget(
+    CardService.newKeyValue()
+      .setIconUrl("https://media.glassdoor.com/sql/1066046/nuxeo-squarelogo-1516893998893.png")
+      .setMultiline(true)
+      .setContent("<b>Please choose a folder to save content:</b>")
+  );
+  var sectionUserWS = CardService.newCardSection();
+  sectionUserWS.addWidget(
+    CardService.newKeyValue()
+      .setIcon(CardService.Icon.PERSON)
+      .setMultiline(true)
+      .setContent("Create in User Workspace")
+      .setOnClickAction(CardService.newAction().setFunctionName("createUserWS"))
+  );
+  var sectionChildren = [];
+  for (var i = 0; i < children.length; i++) {
+    var sectionChild = CardService.newCardSection();
+    var param = {
+      id: children[i].uid
+    };
+    sectionChild
+      .addWidget(
+        CardService.newKeyValue()
+          .setIcon(CardService.Icon.MEMBERSHIP)
+          .setMultiline(true)
+          .setContent(children[i].title)
+          .setOnClickAction(
+            CardService.newAction()
+              .setFunctionName("childNavigate")
+              .setParameters(param)
+          )
+      )
+      .addWidget(
+        CardService.newButtonSet().addButton(
+          CardService.newTextButton()
+            .setText('<font color="#334CFF">Save Here</font>')
+            .setOnClickAction(
+              CardService.newAction()
+                .setFunctionName("pushDocument")
+                .setParameters(param)
+            )
+        )
+      );
+    sectionChildren.push(sectionChild);
+  }
+  var card = card.addSection(sectionLogo).addSection(sectionUserWS);
+  for (var i = 0; i < sectionChildren.length; i++) {
+    card.addSection(sectionChildren[i]);
+  }
+  var build = card.build();
+  return CardService.newActionResponseBuilder()
+    .setNavigation(CardService.newNavigation().pushCard(build))
+    .build();
+}
+
+/**
+  * Fetch the next children for a given doc.
+  */
+
+function childNavigate(param) {
+  var parentId = param.parameters.id;
+  var children = nuxeoClientWrapper().children(parentId);
+  if (_.isEmpty(children)) {
+    return showSimpleCard("Nothing here!", "There is no other folders here.");
+  }
+  return buildChildrenCard(children);
 }
