@@ -35,6 +35,9 @@ function handleDisconnectInfo() {
   );
 }
 
+/**
+ * Top level Action to disconnect (available in manifest - universal actions)
+ */
 function disconnect() {
   nuxeoClientWrapper().disconnect();
   cachedPropertiesForScript_().clear(NUXEO_URL);

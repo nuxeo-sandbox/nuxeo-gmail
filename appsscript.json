@@ -47,6 +47,8 @@
     "primaryColor": "#315df6"
   },
   "urlFetchWhitelist": [
-    "https://nightly.nuxeo.com/"
+    "https://nightly.nuxeo.com/",
+    "https://*.nuxeocloud.com/",
+    "https://*.cloud.nuxeo.com/"
   ]
 }

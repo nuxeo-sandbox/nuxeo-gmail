@@ -67,44 +67,19 @@ var ActionHandlers = {
   }
 };
 
-function handleLinks(owner, repoName, id) {
-  var docLinks = extractNuxeoLinks(message.getBody());
-  if (!_.isEmpty(docLinks)) {
-    return handleDocs_();
-  }
-  var nuxeoResponse = nuxeoClientWrapper().query(Queries.ISSUE, {
-    owner: owner,
-    repo: repoName,
-    issue: id
-  });
-
-  var repo = githubResponse.repository;
-  var issue = githubResponse.repository.issue;
-
-  var card = buildIssueCard({
-    id: issue.id,
-    number: issue.number,
-    title: issue.title,
-    url: issue.url,
-    authorAvatarUrl: issue.author.avatarUrl,
-    repositoryName: repo.nameWithOwner,
-    labels: _.map(issue.labels.nodes, "name"),
-    state: issue.state,
-    author: issue.author.login,
-    assignee: _.get(issue, "assignees.nodes[0].login"),
-    createdAt: issue.createdAt,
-    updatedAt: issue.lastEditedAt
-  });
-
-  return card;
-}
-
 function handleAttachments(event) {
   var message = getCurrentMessage(event);
   var attachments = message.getAttachments();
   if (_.isEmpty(attachments)) {
     return showSimpleCard("Oops!", "There is no attachment to this email. Please select another one.");
   }
+
+  var nuxeoResponse = nuxeoClientWrapper().query(Queries.ISSUE, {
+    owner: owner,
+    repo: repoName,
+    issue: id
+  });
+
   for (var i = 0; i < attachments.length; i++) {
     console.log(JSON.stringify(attachments[i]));
   }
@@ -117,5 +92,17 @@ function handleNotes(event) {
   var sender = message.getFrom();
   var date = message.getDate();
   // TODO: send here the note to user workspace or return a new card for browsing
-  return showSimpleCard("Yeeha!", "You have pushed a new note!");
+  return showSimpleCard("Yeehaa!", "You have pushed a new note!");
+}
+
+/**
+ * Retrieves the current message given an add-on event.
+ * @param {Event} event - Add-on event
+ * @return {Message}
+ */
+function getCurrentMessage(event) {
+  var accessToken = event.messageMetadata.accessToken;
+  var messageId = event.messageMetadata.messageId;
+  GmailApp.setCurrentMessageAccessToken(accessToken);
+  return GmailApp.getMessageById(messageId);
 }

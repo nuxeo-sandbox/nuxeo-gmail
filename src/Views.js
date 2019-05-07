@@ -30,9 +30,9 @@ function buildHomeCard() {
     )
     .addWidget(
       CardService.newKeyValue()
-        .setIcon(CardService.Icon.MEMBERSHIP)
+        .setIcon(CardService.Icon.INVITE)
         .setMultiline(true)
-        .setContent("Display information from Nuxeo links in email")
+        .setContent("Start workflow on uploads for any Nuxeo user(s)")
     )
     .addWidget(
       CardService.newKeyValue()
@@ -234,13 +234,6 @@ function buildNuxeoAction() {
         .setMultiline(true)
         .setContent("Create Nuxeo notes from emails")
         .setOnClickAction(CardService.newAction().setFunctionName("handleNotes"))
-    )
-    .addWidget(
-      CardService.newKeyValue()
-        .setIcon(CardService.Icon.MEMBERSHIP)
-        .setMultiline(true)
-        .setContent("Display information from Nuxeo links in email")
-        .setOnClickAction(CardService.newAction().setFunctionName("handleLinks"))
     );
   return card
     .addSection(sectionLogo)
