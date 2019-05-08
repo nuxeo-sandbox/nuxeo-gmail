@@ -119,12 +119,7 @@ var ActionHandlers = {
       return showSimpleCard("Oops!", "There is no attachment to this email. Please select another one.");
     }
 
-    // Taking attachments as parameter
-    var params = {
-      attachments: attachments
-    };
-
-    return buildChildrenCard_(PUSH_ATTACHMENT, params);
+    return buildAttachCard(attachments);
   },
 
   /**

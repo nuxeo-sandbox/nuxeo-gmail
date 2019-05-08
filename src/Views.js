@@ -318,3 +318,48 @@ function buildChildrenCard(children, action, params) {
     .setNavigation(CardService.newNavigation().pushCard(build))
     .build();
 }
+
+/**
+ * Display attachments to select.
+ */
+function buildAttachCard(attachments) {
+  var card = CardService.newCardBuilder();
+  var sectionLogo = CardService.newCardSection().addWidget(
+    CardService.newKeyValue()
+      .setIconUrl(NUXEO_ICON)
+      .setMultiline(true)
+      .setContent("<b>Please select attachments:</b>")
+  );
+  var sectionAttachments = [];
+  for (var i = 0; i < attachments.length; i++) {
+    var sectionAttach = CardService.newCardSection();
+    var switchKeyValue = CardService.newKeyValue()
+      .setIcon(CardService.Icon.EMAIL)
+      .setMultiline(true)
+      .setContent(attachments[i].getName())
+      .setSwitch(
+        CardService.newSwitch()
+          .setFieldName(attachments[i].getName())
+          .setValue("true")
+      );
+    sectionAttach.addWidget(switchKeyValue);
+    sectionAttachments.push(sectionAttach);
+  }
+  var sectionAction = CardService.newCardSection();
+  sectionAction.addWidget(
+    CardService.newButtonSet().addButton(
+      CardService.newTextButton()
+        .setText('<font color="#334CFF">' + SPACES + "> Select</font>")
+        .setOnClickAction(createAction_("action", {}))
+    )
+  );
+  var card = card.addSection(sectionLogo);
+  for (var i = 0; i < sectionAttachments.length; i++) {
+    card.addSection(sectionAttachments[i]);
+  }
+  card.addSection(sectionAction);
+  var build = card.build();
+  return CardService.newActionResponseBuilder()
+    .setNavigation(CardService.newNavigation().pushCard(build))
+    .build();
+}
