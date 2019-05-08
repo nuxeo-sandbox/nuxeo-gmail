@@ -9,6 +9,8 @@
 
 var NUXEO_ICON = "https://media.glassdoor.com/sql/1066046/nuxeo-squarelogo-1516893998893.png";
 var SPACES = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+var CREATE_NOTE_LABEL = "Create Nuxeo document from an email";
+var PUSH_ATTACH_LABEL = "Push attachments from an email to Nuxeo";
 
 function buildHomeCard() {
   var sectionLogo = CardService.newCardSection().addWidget(
@@ -23,13 +25,13 @@ function buildHomeCard() {
       CardService.newKeyValue()
         .setIcon(CardService.Icon.EMAIL)
         .setMultiline(true)
-        .setContent("Push attachments from emails to Nuxeo")
+        .setContent(PUSH_ATTACH_LABEL)
     )
     .addWidget(
       CardService.newKeyValue()
         .setIcon(CardService.Icon.DESCRIPTION)
         .setMultiline(true)
-        .setContent("Create Nuxeo notes from emails")
+        .setContent(CREATE_NOTE_LABEL)
     )
     .addWidget(
       CardService.newKeyValue()
@@ -156,6 +158,9 @@ function buildErrorCard(opts) {
  */
 function createAction_(name, opt_params) {
   var params = _.extend({}, opt_params);
+  if (params.action) {
+    params.nextAction = params.action;
+  }
   params.action = name;
   return CardService.newAction()
     .setFunctionName("dispatchAction")
@@ -169,14 +174,10 @@ function createAction_(name, opt_params) {
  * @return {OpenLink}
  */
 function createExternalLink(url) {
-  return CardService.newActionResponseBuilder()
-    .setOpenLink(
-      CardService.newOpenLink()
-        .setUrl(url)
-        .setOpenAs(CardService.OpenAs.FULL_SIZE)
-        .setOnClose(CardService.OnClose.NOTHING)
-    )
-    .build();
+  return CardService.newOpenLink()
+    .setUrl(url)
+    .setOpenAs(CardService.OpenAs.FULL_SIZE)
+    .setOnClose(CardService.OnClose.NOTHING);
 }
 
 /**
@@ -211,14 +212,14 @@ function buildNuxeoAction() {
       CardService.newKeyValue()
         .setIcon(CardService.Icon.EMAIL)
         .setMultiline(true)
-        .setContent("Push attachments from emails to Nuxeo")
+        .setContent(PUSH_ATTACH_LABEL)
         .setOnClickAction(createAction_(HANDLE_ATTACHMENTS))
     )
     .addWidget(
       CardService.newKeyValue()
         .setIcon(CardService.Icon.DESCRIPTION)
         .setMultiline(true)
-        .setContent("Create Nuxeo notes from emails")
+        .setContent(CREATE_NOTE_LABEL)
         .setOnClickAction(createAction_(HANDLE_NOTES))
     );
   return card
@@ -244,12 +245,32 @@ function showSimpleCard(title, message) {
 }
 
 /**
+ * show doc creation result.
+ */
+function showResultDoc(title, message, link) {
+  var card = CardService.newCardBuilder();
+  var header = CardService.newCardHeader().setTitle(title);
+  var section = CardService.newCardSection()
+    .addWidget(CardService.newTextParagraph().setText(message))
+    .addWidget(
+      CardService.newTextButton()
+        .setText("Access to the document")
+        .setOpenLink(createExternalLink(link))
+    );
+  var build = card
+    .setHeader(header)
+    .addSection(section)
+    .build();
+  return build;
+}
+
+/**
  * Create the children docs tree card.
  * 
  * @param {Array} children docs
  * @param {String} action to execute when saving
  */
-function buildChildrenCard(children, action) {
+function buildChildrenCard(children, action, params) {
   var card = CardService.newCardBuilder();
   var sectionLogo = CardService.newCardSection().addWidget(
     CardService.newKeyValue()
@@ -263,15 +284,14 @@ function buildChildrenCard(children, action) {
       .setIcon(CardService.Icon.PERSON)
       .setMultiline(true)
       .setContent("Create in User Workspace")
-      .setOnClickAction(createAction_(PUSH_NOTE))
+      .setOnClickAction(createAction_(action + "WS", params))
   );
   var sectionChildren = [];
   for (var i = 0; i < children.length; i++) {
     var sectionChild = CardService.newCardSection();
-    var params = {
-      id: children[i].uid,
-      action: action
-    };
+    params = _.extend({}, params);
+    params.parentId = children[i].uid;
+    params.action = action;
     sectionChild
       .addWidget(
         CardService.newKeyValue()
@@ -283,7 +303,7 @@ function buildChildrenCard(children, action) {
       .addWidget(
         CardService.newButtonSet().addButton(
           CardService.newTextButton()
-            .setText('<font color="#334CFF">' + SPACES + "\> Save Here</font>")
+            .setText('<font color="#334CFF">' + SPACES + "> Save Here</font>")
             .setOnClickAction(createAction_(action, params))
         )
       );
