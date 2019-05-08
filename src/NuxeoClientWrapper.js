@@ -8,6 +8,7 @@
  */
 
 var MAIN_PP = "tree_children";
+var SUGGESTION_PP = "default_document_suggestion";
 
 /**
  * Exception to raise when authorization is required.
@@ -81,9 +82,32 @@ var NuxeoClientPrototype = {
       throw new AuthorizationRequiredException();
     }
     var headers = {
-      Authorization: Utilities.formatString("Bearer %s", this.oauthService.getAccessToken())
+      Authorization: Utilities.formatString("Bearer %s", this.oauthService.getAccessToken()),
+      "enrichers.document": "documentURL"
     };
     var url = this.apiEndpoint + "/search/pp/" + MAIN_PP + "/execute?queryParams=" + id;
+    var response = UrlFetchApp.fetch(url, {
+      method: "get",
+      headers: headers,
+      muteHttpExceptions: true
+    });
+    var raw = response.getContentText();
+    var parsedResponse = JSON.parse(raw);
+    if (parsedResponse.status && parsedResponse.status === 500) {
+      throw new Error(parsedResponse.message);
+    }
+    return parsedResponse.entries;
+  },
+
+  assets: function(fulltext) {
+    if (!this.oauthService.hasAccess()) {
+      throw new AuthorizationRequiredException();
+    }
+    var headers = {
+      Authorization: Utilities.formatString("Bearer %s", this.oauthService.getAccessToken()),
+      "enrichers.document": "documentURL"
+    };
+    var url = this.apiEndpoint + "/search/pp/" + SUGGESTION_PP + "/execute?queryParams=" + fulltext;
     var response = UrlFetchApp.fetch(url, {
       method: "get",
       headers: headers,
