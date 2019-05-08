@@ -172,5 +172,7 @@ function actionErrorHandler(err) {
  * Open external Nuxeo link.
  */
 function openNuxeo() {
-  return createExternalLink(getNuxeoURL().nuxeoUrl);
+  return CardService.newActionResponseBuilder()
+    .setOpenLink(createExternalLink(getNuxeoURL().nuxeoUrl))
+    .build();
 }

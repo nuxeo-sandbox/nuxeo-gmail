@@ -14,7 +14,9 @@ var SHOW_DISCONNECT_INFOS = "showDisconnectInfo";
 var HANDLE_ATTACHMENTS = "handleAttachments";
 var HANDLE_NOTES = "handleNotes";
 var PUSH_NOTE = "pushNote";
+var PUSH_NOTE_WS = "pushNoteWS";
 var PUSH_ATTACHMENT = "pushAttachment";
+var PUSH_ATTACHMENT_WS = "pushAttachmentWS";
 var CHILD_NAVIGATE = "childNavigate";
 var SAVE_CREDS = "saveCreds";
 
@@ -97,13 +99,13 @@ var ActionHandlers = {
   * Fetch the next children for a given doc.
   */
   childNavigate: function(param) {
-    var parentId = param.parameters.id;
-    var action = param.parameters.action;
+    var parentId = param.parameters.parentId;
+    var action = param.parameters.nextAction;
     var children = nuxeoClientWrapper().children(parentId);
     if (_.isEmpty(children)) {
       return showSimpleCard("Nothing here!", "There is no other folders here.");
     }
-    return buildChildrenCard(children, action);
+    return buildChildrenCard(children, action, param.parameters);
   },
 
   /**
@@ -135,8 +137,7 @@ var ActionHandlers = {
     // Taking metadata from the email to propagate to the Note
     var params = {
       content: message.getBody(),
-      sender: message.getFrom(),
-      date: message.getDate()
+      sender: message.getFrom()
     };
     return buildChildrenCard_(PUSH_NOTE, params);
   },
@@ -149,10 +150,34 @@ var ActionHandlers = {
   },
 
   /**
-   * Push a note with the email content and some metadata.
+   * Push attachment(s) to Nuxeo server into the current user workspace.
+   */
+  pushAttachmentWS: function(e) {
+    // TODO
+  },
+
+  /**
+   * Push a note with the email content to a specific location.
    */
   pushNote: function(e) {
-    // TODO
+    var document = nuxeoClientWrapper().pushNote(e.parameters);
+    return showResultDoc(
+      "Success!",
+      "You have successfully created the document",
+      document.contextParameters.documentURL
+    );
+  },
+
+  /**
+   * Push a note as a file into the current user workspace.
+   */
+  pushNoteWS: function(e) {
+    var document = nuxeoClientWrapper().pushNoteWS(e.parameters);
+    return showResultDoc(
+      "Success!",
+      "You have successfully created the document",
+      document.contextParameters.documentURL
+    );
   }
 };
 

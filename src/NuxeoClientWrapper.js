@@ -7,7 +7,7 @@
  *     Nuxeo
  */
 
- var MAIN_PP = "tree_children";
+var MAIN_PP = "tree_children";
 
 /**
  * Exception to raise when authorization is required.
@@ -22,6 +22,27 @@ function AuthorizationRequiredException() {}
 var NuxeoClientPrototype = {
   apiEndpoint: null,
   oauthService: null,
+
+  /**
+   * Get back some current user infos.
+   */
+  login: function() {
+    if (!this.oauthService.hasAccess()) {
+      throw new AuthorizationRequiredException();
+    }
+    var headers = {
+      Authorization: Utilities.formatString("Bearer %s", this.oauthService.getAccessToken())
+    };
+    var url = this.apiEndpoint + "/automation/login";
+    var response = UrlFetchApp.fetch(url, {
+      method: "post",
+      headers: headers,
+      muteHttpExceptions: true
+    });
+    var raw = response.getContentText();
+    var parsedResponse = JSON.parse(raw);
+    return parsedResponse;
+  },
 
   /**
    * Fetch the root document.
@@ -43,6 +64,9 @@ var NuxeoClientPrototype = {
     });
     var raw = response.getContentText();
     var parsedResponse = JSON.parse(raw);
+    if (parsedResponse.status && parsedResponse.status === 500) {
+      throw new Error(parsedResponse.message);
+    }
     return parsedResponse;
   },
 
@@ -53,32 +77,105 @@ var NuxeoClientPrototype = {
    * @return {Object} API response
    */
   children: function(id) {
-      if (!this.oauthService.hasAccess()) {
-        throw new AuthorizationRequiredException();
-      }
-      var headers = {
-        Authorization: Utilities.formatString("Bearer %s", this.oauthService.getAccessToken())
-      };
-      var url = this.apiEndpoint + "/search/pp/" + MAIN_PP + "/execute?queryParams=" + id;
-      var response = UrlFetchApp.fetch(url, {
-        method: "get",
-        headers: headers,
-        muteHttpExceptions: true
-      });
-      var raw = response.getContentText();
-      var parsedResponse = JSON.parse(raw);
-      return parsedResponse.entries;
+    if (!this.oauthService.hasAccess()) {
+      throw new AuthorizationRequiredException();
+    }
+    var headers = {
+      Authorization: Utilities.formatString("Bearer %s", this.oauthService.getAccessToken())
+    };
+    var url = this.apiEndpoint + "/search/pp/" + MAIN_PP + "/execute?queryParams=" + id;
+    var response = UrlFetchApp.fetch(url, {
+      method: "get",
+      headers: headers,
+      muteHttpExceptions: true
+    });
+    var raw = response.getContentText();
+    var parsedResponse = JSON.parse(raw);
+    if (parsedResponse.status && parsedResponse.status === 500) {
+      throw new Error(parsedResponse.message);
+    }
+    return parsedResponse.entries;
+  },
+
+  /**
+   * Push a note as a file into the current user workspace.
+   * @param {Object} params 
+   */
+  pushNoteWS: function(params) {
+    if (!this.oauthService.hasAccess()) {
+      throw new AuthorizationRequiredException();
+    }
+    // Building the payload
+    var blob = Utilities.newBlob(params.content, "text/html", "Email from " + params.sender);
+    var json = {
+      context: {},
+      params: {},
+      input: {}
+    };
+    var payload = {
+      input: blob,
+      automationBody: JSON.stringify(json)
+    };
+    var headers = {
+      Authorization: Utilities.formatString("Bearer %s", this.oauthService.getAccessToken()),
+      "enrichers.document": "documentURL"
+    };
+    var url = this.apiEndpoint + "/automation/UserWorkspace.CreateDocumentFromBlob";
+    var response = UrlFetchApp.fetch(url, {
+      method: "post",
+      payload: payload,
+      headers: headers,
+      muteHttpExceptions: true
+    });
+    var raw = response.getContentText();
+    var parsedResponse = JSON.parse(raw);
+    if (parsedResponse.status && parsedResponse.status === 500) {
+      throw new Error(parsedResponse.message);
+    }
+    return parsedResponse;
   },
 
   /**
    * Create note from email.
    * @param {String} html 
    */
-  pushNote: function(parentId, html) {
-    // TODO
+  pushNote: function(params) {
+    if (!this.oauthService.hasAccess()) {
+      throw new AuthorizationRequiredException();
+    }
+    // Building the payload
+    var blob = Utilities.newBlob(params.content, "text/html", "Email from " + params.sender);
+    var json = {
+      context: {
+        currentDocument: params.parentId
+      },
+      params: {},
+      input: {}
+    };
+    var payload = {
+      input: blob,
+      automationBody: JSON.stringify(json)
+    };
+    var headers = {
+      Authorization: Utilities.formatString("Bearer %s", this.oauthService.getAccessToken()),
+      "enrichers.document": "documentURL"
+    };
+    var url = this.apiEndpoint + "/automation/FileManager.Import";
+    var response = UrlFetchApp.fetch(url, {
+      method: "post",
+      payload: payload,
+      headers: headers,
+      muteHttpExceptions: true
+    });
+    var raw = response.getContentText();
+    var parsedResponse = JSON.parse(raw);
+    if (parsedResponse.status && parsedResponse.status === 500) {
+      throw new Error(parsedResponse.message);
+    }
+    return parsedResponse;
   },
 
-   /**
+  /**
    * Create documents for each attachment.
    * @param {String} html 
    */
