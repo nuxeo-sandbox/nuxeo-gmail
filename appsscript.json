@@ -24,7 +24,7 @@
       "selectActions": [
         {
           "text": "Add documents from Nuxeo",
-          "runFunction": "getContextualAddOn"
+          "runFunction": "attachDocToComposeUI"
         }
       ],
       "draftAccess": "METADATA"
@@ -47,7 +47,7 @@
     "primaryColor": "#315df6"
   },
   "urlFetchWhitelist": [
-    "https://nightly.nuxeo.com/",
+    "https://*.nuxeo.com/",
     "https://*.nuxeocloud.com/",
     "https://*.cloud.nuxeo.com/"
   ]

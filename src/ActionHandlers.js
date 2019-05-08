@@ -18,8 +18,13 @@ var PUSH_NOTE_WS = "pushNoteWS";
 var PUSH_ATTACHMENT = "pushAttachment";
 var PUSH_ATTACHMENT_WS = "pushAttachmentWS";
 var CHILD_NAVIGATE = "childNavigate";
+var ASSET_NAVIGATE = "assetNavigate";
 var SAVE_CREDS = "saveCreds";
 var SAVE_ATTACHMENTS = "saveAttachments";
+var DISPLAY_WORKFLOW = "displayWF";
+var EXECUTE_WF = "executeWF";
+var ATTACH_DOCUMENT = "attachDocument";
+var SEARCH_DOCUMENTS = "searchDocuments";
 
 /**
  * Collection of functions to handle user interactions with the add-on. 
@@ -109,6 +114,15 @@ var ActionHandlers = {
     return buildChildrenCard(children, action, param.parameters);
   },
 
+  assetNavigate: function(param) {
+    var parentId = param.parameters.parentId;
+    var children = nuxeoClientWrapper().children(parentId);
+    if (_.isEmpty(children)) {
+      return showSimpleCard("Nothing here!", "There is no other folders here.");
+    }
+    return buildPickUpCard(children, param.parameters);
+  },
+
   /**
    * Handle the push of attachment(s) to Nuxeo from a Gmail email.
    */
@@ -167,7 +181,8 @@ var ActionHandlers = {
     return showResultDoc(
       "Success!",
       "You have successfully created the document",
-      document.contextParameters.documentURL
+      document.contextParameters.documentURL,
+      document.uid
     );
   },
 
@@ -179,7 +194,8 @@ var ActionHandlers = {
     return showResultDoc(
       "Success!",
       "You have successfully created the document",
-      document.contextParameters.documentURL
+      document.contextParameters.documentURL,
+      document.uid
     );
   },
 
@@ -191,7 +207,8 @@ var ActionHandlers = {
     return showResultDoc(
       "Success!",
       "You have successfully created the document",
-      document.contextParameters.documentURL
+      document.contextParameters.documentURL,
+      document.uid
     );
   },
 
@@ -203,8 +220,45 @@ var ActionHandlers = {
     return showResultDoc(
       "Success!",
       "You have successfully created the document",
-      document.contextParameters.documentURL
+      document.contextParameters.documentURL,
+      document.uid
     );
+  },
+
+  /**
+   * Display workflow card.
+   */
+  displayWF: function(e) {
+    return displayWFCard(e.parameters.docId);
+  },
+
+  /**
+   * Execute a workflow for a given user on content
+   */
+  executeWF: function(e) {
+    // TODO
+  },
+
+  attachDocument: function(e) {
+    var url = e.parameters.url;
+    var title = e.parameters.title;
+    var linkToAdd = '<img style="width: 20px" src="' + NUXEO_ICON + '"/><a href="' + url + '">"  ' + title + '"</a>';
+    return (build = CardService.newUpdateDraftActionResponseBuilder()
+      .setUpdateDraftBodyAction(
+        CardService.newUpdateDraftBodyAction()
+          .addUpdateContent(linkToAdd, CardService.ContentType.IMMUTABLE_HTML)
+          .setUpdateType(CardService.UpdateDraftBodyType.IN_PLACE_INSERT)
+      )
+      .build());
+  },
+
+  searchDocuments: function(e) {
+    var fulltext = e.formInput.suggestion;
+    var assets = nuxeoClientWrapper().assets(fulltext);
+    if (_.isEmpty(assets)) {
+      return showSimpleCardForPickup("Nothing here!", "There is no documents.");
+    }
+    return buildPickUpCard(assets, {});
   }
 };
 

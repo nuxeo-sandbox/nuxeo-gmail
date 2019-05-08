@@ -245,9 +245,22 @@ function showSimpleCard(title, message) {
 }
 
 /**
+ * show simple card for pickup.
+ */
+function showSimpleCardForPickup(title, message) {
+  var card = CardService.newCardBuilder();
+  var header = CardService.newCardHeader().setTitle(title);
+  var section = CardService.newCardSection().addWidget(CardService.newTextParagraph().setText(message));
+  return card
+    .setHeader(header)
+    .addSection(section)
+    .build();
+}
+
+/**
  * show doc creation result.
  */
-function showResultDoc(title, message, link) {
+function showResultDoc(title, message, link, docId) {
   var card = CardService.newCardBuilder();
   var header = CardService.newCardHeader().setTitle(title);
   var section = CardService.newCardSection()
@@ -257,11 +270,22 @@ function showResultDoc(title, message, link) {
         .setText("Access to the document")
         .setOpenLink(createExternalLink(link))
     );
-  var build = card
+  var params = {
+    docId: docId
+  };
+  var sectionTask = CardService.newCardSection();
+  sectionTask.addWidget(
+    CardService.newKeyValue()
+      .setIcon(CardService.Icon.INVITE)
+      .setMultiline(true)
+      .setContent("Execute a workflow on this content")
+      .setOnClickAction(createAction_(DISPLAY_WORKFLOW, params))
+  );
+  return card
     .setHeader(header)
     .addSection(section)
+    .addSection(sectionTask)
     .build();
-  return build;
 }
 
 /**
@@ -320,6 +344,61 @@ function buildChildrenCard(children, action, params) {
 }
 
 /**
+ * Create the children docs tree card for pickup.
+ */
+function buildPickUpCard(children, params) {
+  var card = CardService.newCardBuilder();
+  var sectionLogo = CardService.newCardSection().addWidget(
+    CardService.newKeyValue()
+      .setIconUrl(NUXEO_ICON)
+      .setMultiline(true)
+      .setContent("<b>Please choose the document to attach:</b>")
+  );
+  var inputSection = CardService.newCardSection()
+    .addWidget(
+      CardService.newTextInput()
+        .setFieldName("suggestion")
+        .setTitle("Search for...")
+    )
+    .addWidget(
+      CardService.newButtonSet().addButton(
+        CardService.newTextButton()
+          .setText("Search")
+          .setOnClickAction(createAction_(SEARCH_DOCUMENTS))
+      )
+    );
+  var sectionChildren = [];
+  for (var i = 0; i < children.length; i++) {
+    var sectionChild = CardService.newCardSection();
+    params = _.extend({}, params);
+    params.parentId = children[i].uid;
+    params.title = children[i].title;
+    params.url = children[i].contextParameters.documentURL;
+    sectionChild
+      .addWidget(
+        CardService.newKeyValue()
+          .setIcon(CardService.Icon.MEMBERSHIP)
+          .setMultiline(true)
+          .setContent(children[i].title)
+          .setOnClickAction(createAction_(ASSET_NAVIGATE, params))
+      )
+      .addWidget(
+        CardService.newButtonSet().addButton(
+          CardService.newTextButton()
+            .setText('<font color="#334CFF">' + SPACES + "> Attach</font>")
+            .setOnClickAction(createAction_(ATTACH_DOCUMENT, params))
+        )
+      );
+    sectionChildren.push(sectionChild);
+  }
+  var card = card.addSection(sectionLogo).addSection(inputSection);
+  for (var i = 0; i < sectionChildren.length; i++) {
+    card.addSection(sectionChildren[i]);
+  }
+  return card.build();
+}
+
+/**
  * Display attachments to select.
  */
 function buildAttachCard(attachments) {
@@ -362,4 +441,23 @@ function buildAttachCard(attachments) {
   return CardService.newActionResponseBuilder()
     .setNavigation(CardService.newNavigation().pushCard(build))
     .build();
+}
+
+function displayWFCard(docId) {
+  var card = CardService.newCardBuilder();
+  var sectionLogo = CardService.newCardSection().addWidget(
+    CardService.newKeyValue()
+      .setIconUrl(NUXEO_ICON)
+      .setMultiline(true)
+      .setContent("<b>Workflow</b>")
+  );
+  var sectionAction = CardService.newCardSection();
+  sectionAction.addWidget(
+    CardService.newButtonSet().addButton(
+      CardService.newTextButton()
+        .setText('<font color="#334CFF">Execute</font>')
+        .setOnClickAction(createAction_(EXECUTE_WF))
+    )
+  );
+  var card = card.addSection(sectionLogo);
 }

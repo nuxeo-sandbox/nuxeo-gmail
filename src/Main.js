@@ -22,6 +22,19 @@ function getContextualAddOn(event) {
 }
 
 /**
+ * Entry point for selecting documents to insert into gmail message.
+ */
+
+function attachDocToComposeUI(e) {
+  // List assets
+  var assets = nuxeoClientWrapper().assets("");
+  if (_.isEmpty(assets)) {
+    return [showSimpleCardForPickup("Nothing here!", "There is no documents.")];
+  }
+  return [buildPickUpCard(assets, {})];
+}
+
+/**
  * Returning the card of disconnect info.
  */
 function handleDisconnectInfo() {
