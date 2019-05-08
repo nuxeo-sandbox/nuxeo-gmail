@@ -3,10 +3,19 @@
 This Nuxeo Gmail Addon lets the Gmail user:
 
 - Push attachments from emails to Nuxeo
-- Display information from Nuxeo links in email
+- Push email as a document in Nuxeo
 - Browse and attach any document to emails
+- Execute workflow on uploaded content
 
-## How to take over
+<img src="./welcome.png" width="300">
+
+<img src="./actions.png" width="300">
+
+<img src="./attachment.png" width="300">
+
+<img src="./note.png" width="300">
+
+## How to contribute
 
 If you're new to add-on development or Apps Script, try the
 [quickstart][quickstart] before proceeding.
