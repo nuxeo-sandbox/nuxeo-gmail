@@ -60,7 +60,6 @@ var NuxeoClientPrototype = {
         Authorization: Utilities.formatString("Bearer %s", this.oauthService.getAccessToken())
       };
       var url = this.apiEndpoint + "/search/pp/" + MAIN_PP + "/execute?queryParams=" + id;
-      console.log(url);
       var response = UrlFetchApp.fetch(url, {
         method: "get",
         headers: headers,
@@ -72,10 +71,18 @@ var NuxeoClientPrototype = {
   },
 
   /**
-   * Create note from email
+   * Create note from email.
    * @param {String} html 
    */
-  createNote: function(parentId, html) {
+  pushNote: function(parentId, html) {
+    // TODO
+  },
+
+   /**
+   * Create documents for each attachment.
+   * @param {String} html 
+   */
+  pushAttachement: function(parentId, html) {
     // TODO
   },
 

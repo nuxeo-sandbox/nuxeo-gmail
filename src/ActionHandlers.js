@@ -11,6 +11,12 @@ var SHOW_ADDON = "showAddOn";
 var SHOW_AUTHORIZATION_CARD = "showAuthorizationCard";
 var DISCONNECT_ACTION = "disconnectAccount";
 var SHOW_DISCONNECT_INFOS = "showDisconnectInfo";
+var HANDLE_ATTACHMENTS = "handleAttachments";
+var HANDLE_NOTES = "handleNotes";
+var PUSH_NOTE = "pushNote";
+var PUSH_ATTACHMENT = "pushAttachment";
+var CHILD_NAVIGATE = "childNavigate";
+var SAVE_CREDS = "saveCreds";
 
 /**
  * Collection of functions to handle user interactions with the add-on. 
@@ -64,37 +70,109 @@ var ActionHandlers = {
     return buildAuthorizationCard({
       url: nuxeoClientWrapper().authorizationUrl()
     });
+  },
+
+  /**
+   * Save oauth infos and trigger Auth.
+   *
+   * @param {event} event
+   * @return {Card} the auth card 
+   */
+  saveCreds: function(event) {
+    if (event) {
+      var nuxeoUrl = getNuxeoURL();
+      nuxeoUrl.nuxeoUrl = event.formInput.nuxeoUrl;
+      putInCache(NUXEO_URL, nuxeoUrl);
+
+      var credentials = getNuxeoCredentials();
+      credentials.clientId = event.formInput.clientId;
+      credentials.clientSecret = event.formInput.clientSecret;
+      putInCache(CREDENTIALS_KEY, credentials);
+
+      return handleAuthorizationRequired();
+    }
+  },
+
+  /**
+  * Fetch the next children for a given doc.
+  */
+  childNavigate: function(param) {
+    var parentId = param.parameters.id;
+    var action = param.parameters.action;
+    var children = nuxeoClientWrapper().children(parentId);
+    if (_.isEmpty(children)) {
+      return showSimpleCard("Nothing here!", "There is no other folders here.");
+    }
+    return buildChildrenCard(children, action);
+  },
+
+  /**
+   * Handle the push of attachment(s) to Nuxeo from a Gmail email.
+   */
+  handleAttachments: function(event) {
+    var message = getCurrentMessage(event);
+    var attachments = message.getAttachments();
+
+    if (_.isEmpty(attachments)) {
+      return showSimpleCard("Oops!", "There is no attachment to this email. Please select another one.");
+    }
+
+    // Taking attachments as parameter
+    var params = {
+      attachments: attachments
+    };
+
+    return buildChildrenCard_(PUSH_ATTACHMENT, params);
+  },
+
+  /**
+   * Handle the push of a note to Nuxeo from a Gmail email.
+   */
+  handleNotes: function(event) {
+    // Read current email
+    var message = getCurrentMessage(event);
+
+    // Taking metadata from the email to propagate to the Note
+    var params = {
+      content: message.getBody(),
+      sender: message.getFrom(),
+      date: message.getDate()
+    };
+    return buildChildrenCard_(PUSH_NOTE, params);
+  },
+
+  /**
+   * Push attachment(s) to Nuxeo server for given parent id.
+   */
+  pushAttachment: function(e) {
+    // TODO
+  },
+
+  /**
+   * Push a note with the email content and some metadata.
+   */
+  pushNote: function(e) {
+    // TODO
   }
 };
 
-function handleAttachments(event) {
-  var message = getCurrentMessage(event);
-  var attachments = message.getAttachments();
-
-  if (_.isEmpty(attachments)) {
-    return showSimpleCard("Oops!", "There is no attachment to this email. Please select another one.");
-  }
-
+/**
+ * Build the children card depending on action.
+ */
+function buildChildrenCard_(action, params) {
+  // Fetch the root document to list children
   var rootDocument = nuxeoClientWrapper().root();
-  if(!rootDocument){
+  if (!rootDocument) {
     return showSimpleCard("Oops!", "There is a problem with the Nuxeo instance. Please check with the support.");
   }
 
+  // List children
   var children = nuxeoClientWrapper().children(rootDocument.uid);
-  if(_.isEmpty(children)){
+  if (_.isEmpty(children)) {
     return showSimpleCard("Nothing here!", "There is no other folders here.");
   }
 
-  return buildChildrenCard(children);
-}
-
-function handleNotes(event) {
-  var message = getCurrentMessage(event);
-  var content = message.getBody();
-  var sender = message.getFrom();
-  var date = message.getDate();
-  // TODO: send here the note to user workspace or return a new card for browsing
-  return showSimpleCard("Yeehaa!", "You have pushed a new note!");
+  return buildChildrenCard(children, action, params);
 }
 
 /**

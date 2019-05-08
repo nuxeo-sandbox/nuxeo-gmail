@@ -47,8 +47,6 @@ function disconnect() {
 
 /**
  * Entry point for custom authorization screen.
- * 
- * TODO - Remove once authorization error allows passing card directly
  *
  * @return {Card} Card for authorization screen
  */
