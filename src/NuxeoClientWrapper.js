@@ -179,8 +179,93 @@ var NuxeoClientPrototype = {
    * Create documents for each attachment.
    * @param {String} html 
    */
-  pushAttachement: function(parentId, html) {
-    // TODO
+  pushAttachment: function(params) {
+    if (!this.oauthService.hasAccess()) {
+      throw new AuthorizationRequiredException();
+    }
+    var json = {
+      context: {
+        currentDocument: params.parentId
+      },
+      params: {},
+      input: {}
+    };
+    var ctx = JSON.parse(params.event);
+    var message = getCurrentMessage(ctx);
+    var attachments = message.getAttachments();
+    var blobs = [];
+    var indexes = JSON.parse(params.attachIndexes);
+    for (var i = 0; i < indexes.length; i++) {
+      blobs.push(attachments[indexes[i]]);
+    }
+    // TODO: investigate why we cannot send a list
+    var payload = {
+      input: blobs[0],
+      automationBody: JSON.stringify(json)
+    };
+    var headers = {
+      Authorization: Utilities.formatString("Bearer %s", this.oauthService.getAccessToken()),
+      "enrichers.document": "documentURL"
+    };
+    var url = this.apiEndpoint + "/automation/FileManager.Import";
+    var response = UrlFetchApp.fetch(url, {
+      method: "post",
+      payload: payload,
+      headers: headers,
+      muteHttpExceptions: true
+    });
+    var raw = response.getContentText();
+    var parsedResponse = JSON.parse(raw);
+    if (parsedResponse.status && parsedResponse.status === 500) {
+      throw new Error(parsedResponse.message);
+    }
+    return parsedResponse;
+  },
+
+  /**
+   * Create documents for each attachment into user workspace.
+   * @param {String} html 
+   */
+  pushAttachmentWS: function(params) {
+    if (!this.oauthService.hasAccess()) {
+      throw new AuthorizationRequiredException();
+    }
+    // Building the payload
+    var json = {
+      context: {},
+      params: {},
+      input: {}
+    };
+    var ctx = JSON.parse(params.event);
+    var message = getCurrentMessage(ctx);
+    var attachments = message.getAttachments();
+    var blobs = [];
+    var indexes = JSON.parse(params.attachIndexes);
+    for (var i = 0; i < indexes.length; i++) {
+      blobs.push(attachments[indexes[i]]);
+    }
+    // TODO: investigate why we cannot send a list
+    var payload = {
+      input: blobs[0],
+      automationBody: JSON.stringify(json)
+    };
+    var headers = {
+      Authorization: Utilities.formatString("Bearer %s", this.oauthService.getAccessToken()),
+      "enrichers.document": "documentURL"
+    };
+    var url = this.apiEndpoint + "/automation/UserWorkspace.CreateDocumentFromBlob";
+    var response = UrlFetchApp.fetch(url, {
+      method: "post",
+      payload: payload,
+      headers: headers,
+      muteHttpExceptions: true
+    });
+    var raw = response.getContentText();
+    var parsedResponse = JSON.parse(raw);
+    if (parsedResponse.status && parsedResponse.status === 500) {
+      throw new Error(parsedResponse.message);
+    }
+    return parsedResponse;
   },
 
   /**

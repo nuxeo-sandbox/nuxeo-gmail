@@ -339,7 +339,7 @@ function buildAttachCard(attachments) {
       .setContent(attachments[i].getName())
       .setSwitch(
         CardService.newSwitch()
-          .setFieldName(attachments[i].getName())
+          .setFieldName(i.toString())
           .setValue("true")
       );
     sectionAttach.addWidget(switchKeyValue);
@@ -350,7 +350,7 @@ function buildAttachCard(attachments) {
     CardService.newButtonSet().addButton(
       CardService.newTextButton()
         .setText('<font color="#334CFF">' + SPACES + "> Select</font>")
-        .setOnClickAction(createAction_("action", {}))
+        .setOnClickAction(createAction_(SAVE_ATTACHMENTS))
     )
   );
   var card = card.addSection(sectionLogo);

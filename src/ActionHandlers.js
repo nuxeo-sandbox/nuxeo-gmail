@@ -19,6 +19,7 @@ var PUSH_ATTACHMENT = "pushAttachment";
 var PUSH_ATTACHMENT_WS = "pushAttachmentWS";
 var CHILD_NAVIGATE = "childNavigate";
 var SAVE_CREDS = "saveCreds";
+var SAVE_ATTACHMENTS = "saveAttachments";
 
 /**
  * Collection of functions to handle user interactions with the add-on. 
@@ -138,17 +139,48 @@ var ActionHandlers = {
   },
 
   /**
+   * Save attachments
+   */
+  saveAttachments: function(event) {
+    // Take selected attachments
+    var inputs = event.formInputs;
+    var keys = Object.keys(inputs);
+    var attachIndexes = [];
+    for (var i = 0; i < keys.length; i++) {
+      attachIndexes.push(parseInt(keys[i], 10));
+    }
+
+    // Building params
+    var params = {
+      attachIndexes: JSON.stringify(attachIndexes),
+      event: JSON.stringify(event)
+    };
+
+    return buildChildrenCard_(PUSH_ATTACHMENT, params);
+  },
+
+  /**
    * Push attachment(s) to Nuxeo server for given parent id.
    */
   pushAttachment: function(e) {
-    // TODO
+    var document = nuxeoClientWrapper().pushAttachment(e.parameters);
+    return showResultDoc(
+      "Success!",
+      "You have successfully created the document",
+      document.contextParameters.documentURL
+    );
   },
 
   /**
    * Push attachment(s) to Nuxeo server into the current user workspace.
    */
   pushAttachmentWS: function(e) {
-    // TODO
+    var document = nuxeoClientWrapper().pushAttachmentWS(e.parameters);
+    return showResultDoc(
+      "Success!",
+      "You have successfully created the document",
+      document.contextParameters.documentURL
+    );
   },
 
   /**
