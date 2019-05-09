@@ -229,14 +229,27 @@ var ActionHandlers = {
    * Display workflow card.
    */
   displayWF: function(e) {
-    return displayWFCard(e.parameters.docId);
+    var suggestions = nuxeoClientWrapper().workflows();
+    var wfNames = suggestions.map(function(suggestion) {
+      return suggestion.name;
+    });
+    return displayWFCard(e.parameters, wfNames);
   },
 
   /**
    * Execute a workflow for a given user on content
    */
   executeWF: function(e) {
-    // TODO
+    var workflowId = e.formInputs.workflowName;
+    var docId = e.parameters.docId;
+    var link = e.parameters.link;
+    nuxeoClientWrapper().startWF(docId, workflowId[0]);
+    return showResultDoc(
+      "Done!",
+      "Your workflow has started on the document",
+      link,
+      docId
+    );
   },
 
   attachDocument: function(e) {

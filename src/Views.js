@@ -271,7 +271,8 @@ function showResultDoc(title, message, link, docId) {
         .setOpenLink(createExternalLink(link))
     );
   var params = {
-    docId: docId
+    docId: docId,
+    link: link
   };
   var sectionTask = CardService.newCardSection();
   sectionTask.addWidget(
@@ -443,21 +444,35 @@ function buildAttachCard(attachments) {
     .build();
 }
 
-function displayWFCard(docId) {
+function displayWFCard(params, suggestions) {
   var card = CardService.newCardBuilder();
   var sectionLogo = CardService.newCardSection().addWidget(
     CardService.newKeyValue()
       .setIconUrl(NUXEO_ICON)
       .setMultiline(true)
-      .setContent("<b>Workflow</b>")
+      .setContent("<b>Please select the workflow to execute:</b>")
   );
   var sectionAction = CardService.newCardSection();
-  sectionAction.addWidget(
-    CardService.newButtonSet().addButton(
-      CardService.newTextButton()
-        .setText('<font color="#334CFF">Execute</font>')
-        .setOnClickAction(createAction_(EXECUTE_WF))
+  var suggestionsWidget = CardService.newSuggestions();
+  for (var i = 0; i < suggestions.length; i++) {
+    suggestionsWidget.addSuggestion(suggestions[i]);
+  }
+  sectionAction
+    .addWidget(
+      CardService.newTextInput()
+        .setFieldName("workflowName")
+        .setTitle("Workflow:")
+        .setSuggestions(suggestionsWidget)
     )
-  );
-  var card = card.addSection(sectionLogo);
+    .addWidget(
+      CardService.newButtonSet().addButton(
+        CardService.newTextButton()
+          .setText('<font color="#334CFF">Execute</font>')
+          .setOnClickAction(createAction_(EXECUTE_WF, params))
+      )
+    );
+  return card
+    .addSection(sectionLogo)
+    .addSection(sectionAction)
+    .build();
 }
