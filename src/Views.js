@@ -443,7 +443,10 @@ function buildAttachCard(attachments) {
     .build();
 }
 
-function displayWFCard(docId) {
+function displayWFCard(docId, suggestions) {
+  var params = {
+    docId: docId
+  };
   var card = CardService.newCardBuilder();
   var sectionLogo = CardService.newCardSection().addWidget(
     CardService.newKeyValue()
@@ -452,12 +455,19 @@ function displayWFCard(docId) {
       .setContent("<b>Workflow</b>")
   );
   var sectionAction = CardService.newCardSection();
-  sectionAction.addWidget(
+  var suggestionsWidget = CardService.newSuggestions();
+  for (var i = 0; i < suggestions.length; i++) {
+    suggestionsWidget.addSuggestion(suggestions[i]);
+  }
+  sectionAction.addWidget(CardService.newTextInput().setSuggestions(suggestionsWidget)).addWidget(
     CardService.newButtonSet().addButton(
       CardService.newTextButton()
         .setText('<font color="#334CFF">Execute</font>')
-        .setOnClickAction(createAction_(EXECUTE_WF))
+        .setOnClickAction(createAction_(EXECUTE_WF, params))
     )
   );
-  var card = card.addSection(sectionLogo);
+  return card
+    .addSection(sectionLogo)
+    .addSection(sectionAction)
+    .build();
 }

@@ -293,6 +293,57 @@ var NuxeoClientPrototype = {
   },
 
   /**
+   * Fetch the workflows.
+   */
+  workflows: function() {
+    if (!this.oauthService.hasAccess()) {
+      throw new AuthorizationRequiredException();
+    }
+    var headers = {
+      Authorization: Utilities.formatString("Bearer %s", this.oauthService.getAccessToken())
+    };
+    var url = this.apiEndpoint + "/workflowModel";
+    var response = UrlFetchApp.fetch(url, {
+      method: "get",
+      headers: headers,
+      muteHttpExceptions: true
+    });
+    var raw = response.getContentText();
+    var parsedResponse = JSON.parse(raw);
+    if (parsedResponse.status && parsedResponse.status === 500) {
+      throw new Error(parsedResponse.message);
+    }
+    return parsedResponse.entries;
+  },
+
+  startWF: function(docId, workflowId){
+    // Building the payload
+    var payload = {
+      context: {},
+      params: {
+        id: workflowId
+      },
+      input: docId
+    };
+    var headers = {
+      Authorization: Utilities.formatString("Bearer %s", this.oauthService.getAccessToken()),
+      "enrichers.document": "documentURL"
+    };
+    var url = this.apiEndpoint + "/automation/Context.StartWorkflow";
+    var response = UrlFetchApp.fetch(url, {
+      method: "post",
+      payload: payload,
+      headers: headers,
+      muteHttpExceptions: true
+    });
+    var raw = response.getContentText();
+    var parsedResponse = JSON.parse(raw);
+    if (parsedResponse.status && parsedResponse.status === 500) {
+      throw new Error(parsedResponse.message);
+    }
+  },
+
+  /**
    * De-authorizes the Nuxeo client.
    */
   disconnect: function() {
