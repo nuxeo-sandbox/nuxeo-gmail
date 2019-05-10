@@ -233,22 +233,22 @@ var ActionHandlers = {
     var wfNames = suggestions.map(function(suggestion) {
       return suggestion.name;
     });
-    return displayWFCard(e.parameters.docId, wfNames);
+    return displayWFCard(e.parameters, wfNames);
   },
 
   /**
    * Execute a workflow for a given user on content
    */
   executeWF: function(e) {
-    console.log(JSON.stringify(e));
-    var workflowId = e.formInputs.input;
+    var workflowId = e.formInputs.workflowName;
     var docId = e.parameters.docId;
-    nuxeoClientWrapper().startWF(docId, workflowId);
+    var link = e.parameters.link;
+    nuxeoClientWrapper().startWF(docId, workflowId[0]);
     return showResultDoc(
       "Done!",
       "Your workflow has started on the document",
-      document.contextParameters.documentURL,
-      document.uid
+      link,
+      docId
     );
   },
 

@@ -281,6 +281,7 @@ var NuxeoClientPrototype = {
     var response = UrlFetchApp.fetch(url, {
       method: "post",
       payload: payload,
+      contentType: "application/json",
       headers: headers,
       muteHttpExceptions: true
     });
@@ -316,9 +317,9 @@ var NuxeoClientPrototype = {
     return parsedResponse.entries;
   },
 
-  startWF: function(docId, workflowId){
+  startWF: function(docId, workflowId) {
     // Building the payload
-    var payload = {
+    var json = {
       context: {},
       params: {
         id: workflowId
@@ -332,7 +333,8 @@ var NuxeoClientPrototype = {
     var url = this.apiEndpoint + "/automation/Context.StartWorkflow";
     var response = UrlFetchApp.fetch(url, {
       method: "post",
-      payload: payload,
+      contentType: "application/json",
+      payload: JSON.stringify(json),
       headers: headers,
       muteHttpExceptions: true
     });
