@@ -27,6 +27,11 @@ This addon requires the following:
    projects.
 -  A Nuxeo server instance
 
+Working for those versions:
+- gulp 2.0.1
+- npm 6.9.0
+- node 11.14.0
+
 ### Downloading the addon
 
 Download the addon app and navigate into the app directory:
@@ -48,8 +53,9 @@ Download the addon app and navigate into the app directory:
 
 Deploy the add-on by following these steps:
 
-1.  Create a new project:
+1.  Login and Create a new project:
 
+        clasp login 
         clasp create "Nuxeo Gmail"
 
 2.  Push the code:
@@ -82,7 +88,7 @@ Access the GitHub API requires registration. To register your own application:
 
 2.  Get the script id by clicking on **File > Project properties** and note the value of the **Script ID** field.
 
-3.   Use the value `https://script.google.com/macros/d/{SCRIPT_ID}/usercallback` for the **Authorization callback URL**,
+3.   Use the value `https://script.google.com/macros/d/{SCRIPT_ID}/usercallback` for the **Authorization callback URL** which can be configured in the JSF UI (via the cloud service admin screen) and 
     replacing `{SCRIPT_ID}` with the script id located in the previous step.
 
 4.  Create a script property with the credentials:
@@ -96,7 +102,7 @@ Access the GitHub API requires registration. To register your own application:
 	d. Click on the blank area in the **Value** column.
 
 	e. Enter the value below, subsituting the `{CLIENT_ID}` and `{CLIENT_SECRET}` with the values provided
-	   by GitHub.
+	   by GitHub. (can be whatever you want)
 
 	    {"clientId": "{CLIENT_ID}", "clientSecret": "{CLIENT_SECRET}" }
 
