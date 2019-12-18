@@ -28,7 +28,7 @@ This addon requires the following:
 - [clasp](https://github.com/google/clasp#install): `clasp` is a tool for managing Apps Script projects.
   - Tested on clasp 2.3.0
 -  A [Nuxeo Server](http://nuxeo.github.io/downloads.html) instance **which can be reachable from Google / Internet**: You can't use a local instance without a public IP.
-- Tested on LTS 2019 (10.10)
+  - Tested on LTS 2019 (10.10), but should work on LTS 2018 (9.10) and LTS 2017 (8.10)
 - [Apps Script API](https://script.google.com/home/usersettings) enabled on your Google profile.
 
 ## Installation
@@ -86,7 +86,7 @@ clasp version 'Push from github'
 clasp deploy 1 'test'
 ```
 
-- Verify the deployments:
+- Verify the deployments
 
 ```
 clasp deployments
@@ -175,9 +175,9 @@ The add-on appears in the **Developer add-ons** list at this point. The **Enable
 
 ## References
 
-- [Google Chrome Extensions - Getting Started Tutorial]:https://developers.google.com/gmail/add-ons/guides/quickstart
-- [lodash]: https://lodash.com/
-- [moment]: http://momentjs.com/
+- [Google Chrome Extensions - Getting Started Tutorial](https://developers.google.com/gmail/add-ons/guides/quickstart)
+- [lodash](https://lodash.com/)
+- [moment](http://momentjs.com/)
 
 ## Learn
 
