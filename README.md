@@ -20,7 +20,7 @@ This Nuxeo Gmail Addon lets the Gmail user:
 This addon requires the following:
 
 - [NodeJS](https://nodejs.org/en/download/package-manager/)
-  - Tested on node 11.14.0
+  - Tested on node 11.14.0. Doesn't work with node 13.3.0.
 - [npm](https://www.npmjs.com/get-npm)
   - Tested on npm 6.9.0
 - [gulp](https://gulpjs.com/docs/en/getting-started/quick-start)
