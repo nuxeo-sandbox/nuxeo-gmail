@@ -7,13 +7,7 @@ This Nuxeo Gmail Addon lets the Gmail user:
 - Browse and attach any document to emails
 - Execute workflow on uploaded content
 
-<img src="./welcome.png" width="300">
-
-<img src="./actions.png" width="300">
-
-<img src="./attachment.png" width="300">
-
-<img src="./note.png" width="300">
+![Watch the video](video.png)](https://nuxeo.wistia.com/medias/dfjwihao91)
 
 ## Prerequisites
 
